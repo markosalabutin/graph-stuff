@@ -14,6 +14,8 @@ interface EdgeProps {
   isInDeleteMode?: boolean;
   isDirected?: boolean;
   isWeighted?: boolean;
+  isMSTEdge?: boolean;
+  isMSTVisualizationActive?: boolean;
   onEdgeClick?: (edgeId: EdgeId) => void;
   onWeightClick?: (edgeId: EdgeId, currentWeight: Weight) => void;
 }
@@ -29,6 +31,8 @@ export const Edge: React.FC<EdgeProps> = ({
   isInDeleteMode = false,
   isDirected = false,
   isWeighted = false,
+  isMSTEdge = false,
+  isMSTVisualizationActive = false,
   onEdgeClick,
   onWeightClick,
 }) => {
@@ -66,6 +70,15 @@ export const Edge: React.FC<EdgeProps> = ({
 
     if (isInDeleteMode) {
       edgeClass += ` ${styles.deletable}`;
+    }
+
+    // Add MST visualization classes
+    if (isMSTVisualizationActive) {
+      if (isMSTEdge) {
+        edgeClass += ` ${styles.mstEdge}`;
+      } else {
+        edgeClass += ` ${styles.nonMstEdge}`;
+      }
     }
 
     return edgeClass;

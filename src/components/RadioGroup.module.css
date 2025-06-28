@@ -1,0 +1,66 @@
+.radioGroup {
+  display: flex;
+  gap: 4px;
+}
+
+.radioGroup.fullWidth {
+  width: 100%;
+}
+
+.radioOption {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.fullWidth .radioOption {
+  flex: 1;
+}
+
+.radioInput {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.radioLabel {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  color: #666;
+  background-color: white;
+  border: 1px solid #dee2e6;
+  user-select: none;
+}
+
+.fullWidth .radioLabel {
+  width: 100%;
+  text-align: center;
+  display: block;
+}
+
+.radioLabel:hover {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.radioLabel.active {
+  background-color: var(--option-color, #007bff);
+  color: white;
+  border-color: var(--option-color, #007bff);
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Variant for transparent background (like original ModeToggle) */
+.radioGroup.transparent .radioLabel {
+  background-color: transparent;
+  border: none;
+}
+
+.radioGroup.transparent .radioLabel:hover {
+  background-color: #f8f9fa;
+}

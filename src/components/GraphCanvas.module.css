@@ -20,6 +20,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 20px;
+  pointer-events: none;
 }
 
 .leftControls {
@@ -29,18 +30,25 @@
   flex: 1;
   min-width: 0;
   align-items: flex-start;
+  pointer-events: none;
+}
+
+.leftControls > * {
+  pointer-events: auto;
 }
 
 .rightControls {
   flex-shrink: 0;
+  pointer-events: auto;
 }
 
 .counter {
-  position: absolute;
+  position: fixed !important;
   bottom: 20px;
   right: 20px;
-  z-index: 10;
+  z-index: 20;
   font-weight: bold;
+  pointer-events: auto;
 }
 
 .canvasArea {
@@ -72,6 +80,9 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   font-size: 14px;
+  pointer-events: auto;
+  position: relative;
+  z-index: 20;
 }
 
 .instructions {

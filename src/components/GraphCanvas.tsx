@@ -1,8 +1,10 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { useGraph } from '../context/GraphContext';
+import { useMSTContext } from '../context/MSTContext';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
-import { ModeToggle } from './ModeToggle';
+import { ModeSelector } from './ModeSelector';
 import { GraphOptions } from './GraphOptions';
+import { MSTVisualization } from './MSTVisualization';
 import { Edge } from './Edge';
 import { Vertex } from './Vertex';
 import styles from './GraphCanvas.module.css';
@@ -40,6 +42,7 @@ export const GraphCanvas: React.FC = () => {
     transitionGraphType, 
     getGraphType 
   } = useGraph();
+  const { mstEdgeIds, isMSTVisualizationActive } = useMSTContext();
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const vertices = getVertices();
@@ -345,6 +348,8 @@ export const GraphCanvas: React.FC = () => {
         isDirected={isDirected}
         isWeighted={isWeighted}
         isInDeleteMode={currentMode === Mode.DELETE}
+        isMSTEdge={mstEdgeIds.has(edge.id)}
+        isMSTVisualizationActive={isMSTVisualizationActive}
         onEdgeClick={handleEdgeClick}
         onWeightClick={isWeighted && currentMode !== Mode.DELETE ? handleWeightClick : undefined}
       />
@@ -406,9 +411,12 @@ export const GraphCanvas: React.FC = () => {
             isWeighted={isWeighted}
             onWeightedChange={handleWeightedChange}
           />
+          <MSTVisualization 
+            isWeighted={isWeighted}
+          />
         </div>
         <div className={styles.rightControls}>
-          <ModeToggle 
+          <ModeSelector 
             currentMode={currentMode}
             onModeChange={handleModeChange}
           />

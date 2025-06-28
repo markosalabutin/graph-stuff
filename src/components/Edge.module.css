@@ -100,3 +100,45 @@
 .edge.deletable:hover .weightLabel {
   fill: #dc3545;
 }
+
+/* MST Visualization Styles */
+.edge.mstEdge .line {
+  stroke: #28a745;
+  stroke-width: 4px;
+}
+
+.edge.mstEdge .arrowhead {
+  fill: #28a745;
+}
+
+.edge.mstEdge .weightBackground {
+  fill: #d4edda;
+  stroke: #28a745;
+  stroke-width: 2px;
+}
+
+.edge.mstEdge .weightLabel {
+  fill: #155724;
+  font-weight: 700;
+}
+
+.edge.nonMstEdge .line {
+  stroke: #dc3545;
+  opacity: 0.7;
+}
+
+.edge.nonMstEdge .arrowhead {
+  fill: #dc3545;
+  opacity: 0.7;
+}
+
+.edge.nonMstEdge .weightBackground {
+  fill: #f8d7da;
+  stroke: #dc3545;
+  stroke-width: 1px;
+}
+
+.edge.nonMstEdge .weightLabel {
+  fill: #721c24;
+  opacity: 0.8;
+}
