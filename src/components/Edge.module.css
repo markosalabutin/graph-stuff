@@ -1,0 +1,102 @@
+/* Edge styling - keep thickness in sync with EDGE_THICKNESS in graphConstants.ts */
+.edge {
+  position: absolute;
+  pointer-events: none;
+}
+
+.edge .line {
+  pointer-events: none;
+}
+
+.edge.normal .line {
+  stroke: #666;
+  fill: none;
+  z-index: 0;
+}
+
+.edge.preview .line {
+  stroke: #1976d2;
+  opacity: 0.7;
+  fill: none;
+  z-index: -1;
+}
+
+.edge.deletable {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.edge.deletable .line {
+  pointer-events: stroke;
+  transition: all 0.2s ease;
+}
+
+.edge.deletable:hover .line {
+  stroke: #dc3545;
+  stroke-width: 5px;
+}
+
+.arrowhead {
+  fill: inherit;
+}
+
+.edge.normal .arrowhead {
+  fill: #666;
+}
+
+.edge.preview .arrowhead {
+  fill: #1976d2;
+  opacity: 0.7;
+}
+
+.edge.deletable:hover .arrowhead {
+  fill: #dc3545;
+}
+
+.weightBackground {
+  fill: white;
+  stroke: #ddd;
+  stroke-width: 1px;
+  pointer-events: none;
+}
+
+.weightLabel {
+  fill: #333;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.weightClickable .weightBackground,
+.weightClickable .weightLabel {
+  pointer-events: all;
+}
+
+.weightClickable:hover .weightBackground {
+  fill: #f0f8ff;
+  stroke: #1976d2;
+  stroke-width: 2px;
+}
+
+.weightClickable:hover .weightLabel {
+  fill: #1976d2;
+}
+
+.edge.normal .weightBackground {
+  fill: white;
+  stroke: #ddd;
+}
+
+.edge.normal .weightLabel {
+  fill: #333;
+}
+
+.edge.deletable:hover .weightBackground {
+  fill: #ffe6e6;
+  stroke: #dc3545;
+}
+
+.edge.deletable:hover .weightLabel {
+  fill: #dc3545;
+}

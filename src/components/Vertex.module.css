@@ -1,0 +1,61 @@
+.vertex {
+  position: absolute;
+  width: 50px; /* VERTEX_SIZE */
+  height: 50px; /* VERTEX_SIZE */
+  border: 3px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: grab;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  z-index: 1; /* Z_INDEX.VERTEX */
+}
+
+.vertex.normal {
+  background-color: #28a745;
+}
+
+.vertex.dragging {
+  background-color: #007bff;
+  transition: none;
+  z-index: 1000; /* Z_INDEX.DRAGGING_VERTEX */
+  transform: scale(1.1);
+}
+
+.vertex.sourceVertex {
+  background-color: #ffc107;
+  animation: pulse 1s infinite;
+}
+
+.vertex.hoveredTarget {
+  background-color: #ffc107;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(255, 193, 7, 0.4);
+}
+
+.vertex.deletable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vertex.deletable:hover {
+  background-color: #dc3545;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.vertex:active {
+  cursor: grabbing;
+}
