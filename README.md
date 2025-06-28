@@ -1,5 +1,9 @@
 # Advanced Graph Editor
 
+[![Deploy to GitHub Pages](https://github.com/markosalabutin/graph-stuff/actions/workflows/deploy.yml/badge.svg)](https://github.com/markosalabutin/graph-stuff/actions/workflows/deploy.yml)
+
+🚀 **[Live Demo](https://markosalabutin.github.io/graph-stuff)**
+
 An interactive, modular React-based graph editor with support for both directed and undirected graphs, weighted and unweighted edges, and comprehensive editing capabilities.
 
 ## Features
@@ -86,6 +90,14 @@ npm run test:run <test-name>
 # Generate coverage report
 npm run test:coverage
 ```
+
+## Deployment
+
+This project is automatically deployed to GitHub Pages using GitHub Actions. Every push to the `main` branch triggers a new deployment.
+
+- **Live Demo**: https://markosalabutin.github.io/graph-stuff
+- **Deployment Status**: Check the badge above for current deployment status
+- **Manual Deployment**: The GitHub Actions workflow handles deployment automatically
 
 ## Usage Examples
 
