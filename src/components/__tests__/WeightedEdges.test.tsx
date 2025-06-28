@@ -1,10 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { GraphProvider } from '../../context/GraphProvider';
+import { MSTProvider } from '../../context/MSTProvider';
 import { GraphCanvas } from '../GraphCanvas';
 
 const renderWithProvider = (component: React.ReactElement) => {
-  return render(<GraphProvider>{component}</GraphProvider>);
+  return render(
+    <GraphProvider>
+      <MSTProvider>
+        {component}
+      </MSTProvider>
+    </GraphProvider>
+  );
 };
 
 describe('Weighted Graph Integration', () => {
@@ -22,7 +29,7 @@ describe('Weighted Graph Integration', () => {
     fireEvent.click(weightedToggle);
     expect(weightedToggle).toBeChecked();
 
-    const edgeMode = screen.getByLabelText(/edge mode/i);
+    const edgeMode = screen.getByRole('radio', { name: /edge/i });
     fireEvent.click(edgeMode);
 
     expect(screen.getByText(/weight will be prompted/i)).toBeInTheDocument();
@@ -244,7 +251,7 @@ describe('Weight Click Integration', () => {
     const weightedToggle = screen.getByLabelText(/weighted graph/i);
     fireEvent.click(weightedToggle);
 
-    const vertexMode = screen.getByLabelText(/vertex mode/i);
+    const vertexMode = screen.getByRole('radio', { name: /vertex/i });
     fireEvent.click(vertexMode);
 
     const canvas = document.querySelector('[class*="canvasArea"]') as HTMLElement;
@@ -261,7 +268,7 @@ describe('Weight Click Integration', () => {
       clientY: 200 
     });
 
-    const edgeMode = screen.getByLabelText(/edge mode/i);
+    const edgeMode = screen.getByRole('radio', { name: /edge/i });
     fireEvent.click(edgeMode);
 
     vi.mocked(window.prompt).mockReturnValue('2.5');
@@ -282,7 +289,7 @@ describe('Weight Click Integration', () => {
     const weightedToggle = screen.getByLabelText(/weighted graph/i);
     fireEvent.click(weightedToggle);
 
-    const deleteMode = screen.getByLabelText(/delete mode/i);
+    const deleteMode = screen.getByRole('radio', { name: /delete/i });
     fireEvent.click(deleteMode);
 
     expect(deleteMode).toBeChecked();
