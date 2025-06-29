@@ -1,27 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { ShortestPathService } from '../ShortestPathService';
-import type { GraphAPI } from '../../context/GraphContext';
-import type { VertexId, Weight } from '../../domain/Graph';
-
-// Mock GraphAPI implementation for testing
-const createMockGraph = (
-  vertices: VertexId[],
-  edges: Array<{ source: VertexId; target: VertexId; weight: Weight }>,
-  graphType: 'directed' | 'undirected' = 'directed'
-): GraphAPI => {
-  return {
-    getVertices: () => vertices,
-    getEdges: () => edges.map((edge, index) => ({ id: `e${index}`, ...edge })),
-    getGraphType: () => graphType,
-    addVertex: vi.fn(),
-    getVertex: vi.fn(),
-    addEdge: vi.fn(),
-    setEdgeWeight: vi.fn(),
-    removeVertex: vi.fn(),
-    removeEdge: vi.fn(),
-    transitionGraphType: vi.fn(),
-  };
-};
+import { createMockGraph } from './testUtils';
 
 describe('ShortestPathService', () => {
   describe('Graph Validation', () => {

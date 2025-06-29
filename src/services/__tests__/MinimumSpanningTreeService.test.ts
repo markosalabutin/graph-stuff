@@ -1,29 +1,10 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { 
   kruskalMST, 
   primMST, 
   computeMST
 } from '../MinimumSpanningTreeService';
-import type { GraphAPI } from '../../context/GraphContext';
-import type { VertexId, EdgeId } from '../../domain/Graph';
-import type { GraphType } from '../../domain/GraphModel';
-
-const createMockGraph = (
-  vertices: VertexId[],
-  edges: Array<{ id: EdgeId; source: VertexId; target: VertexId; weight: number }>,
-  graphType: GraphType = 'undirected'
-): GraphAPI => ({
-  getVertices: () => vertices,
-  getEdges: () => edges,
-  getGraphType: () => graphType,
-  addVertex: vi.fn(),
-  addEdge: vi.fn(),
-  removeVertex: vi.fn(),
-  removeEdge: vi.fn(),
-  setEdgeWeight: vi.fn(),
-  transitionGraphType: vi.fn(),
-  getVertex: vi.fn()
-});
+import { createMockGraph } from './testUtils';
 
 describe('MinimumSpanningTreeService', () => {
   describe('Graph Validation', () => {
@@ -42,7 +23,7 @@ describe('MinimumSpanningTreeService', () => {
     });
 
     it('should reject graphs with insufficient vertices', () => {
-      const graph = createMockGraph(['A'], []);
+      const graph = createMockGraph(['A'], [], 'undirected');
 
       const result = kruskalMST(graph);
       expect(result.success).toBe(false);
@@ -57,7 +38,8 @@ describe('MinimumSpanningTreeService', () => {
         [
           { id: 'e1', source: 'A', target: 'B', weight: 1 },
           { id: 'e2', source: 'C', target: 'D', weight: 2 }
-        ]
+        ],
+        'undirected'
       );
 
       const result = kruskalMST(graph);
@@ -76,7 +58,8 @@ describe('MinimumSpanningTreeService', () => {
           { id: 'e1', source: 'A', target: 'B', weight: 1 },
           { id: 'e2', source: 'B', target: 'C', weight: 2 },
           { id: 'e3', source: 'A', target: 'C', weight: 3 }
-        ]
+        ],
+        'undirected'
       );
 
       const result = kruskalMST(graph);
@@ -95,7 +78,8 @@ describe('MinimumSpanningTreeService', () => {
     it('should handle single edge graph', () => {
       const graph = createMockGraph(
         ['A', 'B'],
-        [{ id: 'e1', source: 'A', target: 'B', weight: 10 }]
+        [{ id: 'e1', source: 'A', target: 'B', weight: 10 }],
+        'undirected'
       );
 
       const result = kruskalMST(graph);
@@ -116,7 +100,8 @@ describe('MinimumSpanningTreeService', () => {
           { id: 'e1', source: 'A', target: 'B', weight: 1 },
           { id: 'e2', source: 'B', target: 'C', weight: 2 },
           { id: 'e3', source: 'A', target: 'C', weight: 3 }
-        ]
+        ],
+        'undirected'
       );
 
       const result = primMST(graph);
@@ -137,7 +122,8 @@ describe('MinimumSpanningTreeService', () => {
           { id: 'e2', source: 'B', target: 'C', weight: 2 },
           { id: 'e3', source: 'C', target: 'D', weight: 3 },
           { id: 'e4', source: 'D', target: 'A', weight: 4 }
-        ]
+        ],
+        'undirected'
       );
 
       const result = primMST(graph, 'C');
@@ -162,7 +148,8 @@ describe('MinimumSpanningTreeService', () => {
           { id: 'e5', source: 'C', target: 'D', weight: 4 },
           { id: 'e6', source: 'B', target: 'E', weight: 3 },
           { id: 'e7', source: 'D', target: 'E', weight: 8 }
-        ]
+        ],
+        'undirected'
       );
 
       const kruskalResult = kruskalMST(graph);
@@ -183,7 +170,8 @@ describe('MinimumSpanningTreeService', () => {
     it('should use Kruskal by default', () => {
       const graph = createMockGraph(
         ['A', 'B'],
-        [{ id: 'e1', source: 'A', target: 'B', weight: 5 }]
+        [{ id: 'e1', source: 'A', target: 'B', weight: 5 }],
+        'undirected'
       );
 
       const result = computeMST(graph);
@@ -197,7 +185,8 @@ describe('MinimumSpanningTreeService', () => {
     it('should use Prim when specified', () => {
       const graph = createMockGraph(
         ['A', 'B'],
-        [{ id: 'e1', source: 'A', target: 'B', weight: 5 }]
+        [{ id: 'e1', source: 'A', target: 'B', weight: 5 }],
+        'undirected'
       );
 
       const result = computeMST(graph, 'prim');
