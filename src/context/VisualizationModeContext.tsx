@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react';
 
-export type VisualizationMode = 'none' | 'mst' | 'shortest-path';
+export type VisualizationMode = 'none' | 'mst' | 'shortest-path' | 'apsp';
 
 export interface VisualizationModeContextType {
   activeMode: VisualizationMode;

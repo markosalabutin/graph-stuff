@@ -7,6 +7,7 @@ import { ModeSelector } from './ModeSelector';
 import { GraphOptions } from './GraphOptions';
 import { MSTVisualization } from './MSTVisualization';
 import { ShortestPathVisualization } from './ShortestPathVisualization';
+import { AllPairsShortestPathVisualization } from './AllPairsShortestPathVisualization';
 import { InstructionText } from './InstructionText';
 import { Edge } from './Edge';
 import { Vertex } from './Vertex';
@@ -537,6 +538,7 @@ export const GraphCanvas: React.FC = () => {
           />
           <MSTVisualization isWeighted={isWeighted} />
           <ShortestPathVisualization isWeighted={isWeighted} />
+          <AllPairsShortestPathVisualization isWeighted={isWeighted} />
         </div>
         <div className={styles.rightControls}>
           <ModeSelector

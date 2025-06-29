@@ -1,0 +1,189 @@
+.section {
+  margin-bottom: 20px;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  margin: 0 0 12px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Algorithm Selection */
+.algorithmToggle {
+  margin-bottom: 4px;
+}
+
+/* APSP Information Display */
+.apspInfo {
+  margin-top: 16px;
+  padding: 16px;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.apspStats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.statItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.statValue {
+  font-size: 13px;
+  color: #343a40;
+  font-weight: 600;
+}
+
+/* Error Message */
+.errorMessage {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.errorMessage strong {
+  font-weight: 600;
+}
+
+/* Fixed Width for All-Pairs Shortest Path Visualization Accordion */
+.apspAccordion {
+  width: 270px;
+}
+
+/* When matrix is shown, allow accordion to expand */
+.apspAccordionExpanded {
+  width: auto;
+  min-width: 270px;
+  max-width: 500px;
+}
+
+/* Distance Matrix Styles */
+.matrixContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.matrixTitle {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 600;
+  margin: 0;
+}
+
+.tableWrapper {
+  overflow: auto;
+  max-width: 500px;
+  max-height: 400px;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  background-color: #ffffff;
+}
+
+.distanceTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 150px;
+}
+
+.cornerHeader {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 4px 6px;
+  font-weight: 600;
+  color: #495057;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  font-size: 11px;
+}
+
+.columnHeader {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 4px 6px;
+  font-weight: 600;
+  color: #495057;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  min-width: 30px;
+  font-size: 11px;
+}
+
+.rowHeader {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  padding: 4px 6px;
+  font-weight: 600;
+  color: #495057;
+  text-align: center;
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  min-width: 30px;
+  font-size: 11px;
+}
+
+.distanceCell {
+  border: 1px solid #e9ecef;
+  padding: 4px 6px;
+  text-align: center;
+  background-color: #ffffff;
+  transition: background-color 0.15s ease;
+  font-size: 11px;
+  min-width: 30px;
+}
+
+.distanceCell:hover {
+  background-color: #f8f9fa;
+}
+
+.diagonalCell {
+  background-color: #fff3cd;
+  font-weight: 600;
+  color: #856404;
+}
+
+.diagonalCell:hover {
+  background-color: #ffeaa7;
+}
+
+.finiteDistance {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.infiniteDistance {
+  color: #6c757d;
+  font-style: italic;
+}
