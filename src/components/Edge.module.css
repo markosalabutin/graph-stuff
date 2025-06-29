@@ -142,3 +142,57 @@
   fill: #721c24;
   opacity: 0.8;
 }
+
+/* Shortest Path Visualization Styles */
+.edge.shortestPathEdge .line {
+  stroke: #17a2b8;
+  stroke-width: 5px;
+  animation: pathPulse 2s infinite;
+}
+
+.edge.shortestPathEdge .arrowhead {
+  fill: #17a2b8;
+  animation: pathPulse 2s infinite;
+}
+
+.edge.shortestPathEdge .weightBackground {
+  fill: #b8ecf3;
+  stroke: #17a2b8;
+  stroke-width: 2px;
+}
+
+.edge.shortestPathEdge .weightLabel {
+  fill: #0c5460;
+  font-weight: 700;
+}
+
+.edge.nonShortestPathEdge .line {
+  stroke: #666;
+  opacity: 0.3;
+}
+
+.edge.nonShortestPathEdge .arrowhead {
+  fill: #666;
+  opacity: 0.3;
+}
+
+.edge.nonShortestPathEdge .weightBackground {
+  fill: #f8f9fa;
+  stroke: #666;
+  stroke-width: 1px;
+  opacity: 0.5;
+}
+
+.edge.nonShortestPathEdge .weightLabel {
+  fill: #666;
+  opacity: 0.5;
+}
+
+@keyframes pathPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}

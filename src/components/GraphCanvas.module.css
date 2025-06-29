@@ -66,6 +66,11 @@
   cursor: pointer;
 }
 
+.canvasArea.shortestPathMode {
+  cursor: crosshair;
+  background-color: #f0f8ff;
+}
+
 .canvasArea.deleteMode {
   cursor: pointer;
 }

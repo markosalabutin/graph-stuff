@@ -2,14 +2,20 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { GraphProvider } from '../../context/GraphProvider';
 import { MSTProvider } from '../../context/MSTProvider';
+import { ShortestPathProvider } from '../../context/ShortestPathProvider';
+import { VisualizationModeProvider } from '../../context/VisualizationModeProvider';
 import { GraphCanvas } from '../GraphCanvas';
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(
     <GraphProvider>
-      <MSTProvider>
-        {component}
-      </MSTProvider>
+      <VisualizationModeProvider>
+        <MSTProvider>
+          <ShortestPathProvider>
+            {component}
+          </ShortestPathProvider>
+        </MSTProvider>
+      </VisualizationModeProvider>
     </GraphProvider>
   );
 };

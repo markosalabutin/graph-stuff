@@ -23,14 +23,6 @@ export class ShortestPathService {
     algorithm: ShortestPathAlgorithm
   ): ShortestPathError | null {
     const vertices = graph.getVertices();
-    const graphType = graph.getGraphType();
-
-    if (graphType !== 'directed') {
-      return {
-        type: 'validation',
-        message: 'Shortest path algorithms require directed graphs',
-      };
-    }
 
     if (vertices.length < 2) {
       return {
@@ -67,13 +59,23 @@ export class ShortestPathService {
     const visited = new Set<VertexId>();
     const queue = [source];
     const edges = graph.getEdges();
+    const isDirected = graph.getGraphType() === 'directed';
 
     const adjacencyList = new Map<VertexId, VertexId[]>();
     for (const edge of edges) {
+      // Add forward edge
       if (!adjacencyList.has(edge.source)) {
         adjacencyList.set(edge.source, []);
       }
       adjacencyList.get(edge.source)!.push(edge.target);
+
+      // For undirected graphs, add reverse edge
+      if (!isDirected) {
+        if (!adjacencyList.has(edge.target)) {
+          adjacencyList.set(edge.target, []);
+        }
+        adjacencyList.get(edge.target)!.push(edge.source);
+      }
     }
 
     while (queue.length > 0) {
@@ -127,7 +129,8 @@ export class ShortestPathService {
   static dijkstra(
     graph: GraphAPI,
     source: VertexId,
-    target: VertexId
+    target: VertexId,
+    isWeighted: boolean = true
   ): ShortestPathResult | ShortestPathError {
     const validationError = this.validateGraph(graph, 'dijkstra');
     if (validationError) {
@@ -170,6 +173,7 @@ export class ShortestPathService {
     const predecessors = new Map<VertexId, VertexId | null>();
     const visited = new Set<VertexId>();
     const edges = graph.getEdges();
+    const isDirected = graph.getGraphType() === 'directed';
 
     for (const vertex of vertices) {
       distances.set(vertex, vertex === source ? 0 : Infinity);
@@ -186,7 +190,16 @@ export class ShortestPathService {
       }
       adjacencyList
         .get(edge.source)!
-        .push({ target: edge.target, weight: edge.weight });
+        .push({ target: edge.target, weight: isWeighted ? edge.weight : 1 });
+
+      if (!isDirected) {
+        if (!adjacencyList.has(edge.target)) {
+          adjacencyList.set(edge.target, []);
+        }
+        adjacencyList
+          .get(edge.target)!
+          .push({ target: edge.source, weight: isWeighted ? edge.weight : 1 });
+      }
     }
 
     const pq = new PriorityQueue<{ node: VertexId; distance: number }>();
@@ -242,7 +255,8 @@ export class ShortestPathService {
   static bellmanFord(
     graph: GraphAPI,
     source: VertexId,
-    target: VertexId
+    target: VertexId,
+    isWeighted: boolean = true
   ): ShortestPathResult | ShortestPathError {
     const validationError = this.validateGraph(graph, 'bellman-ford');
     if (validationError && validationError.type !== 'negative_weights') {
@@ -285,10 +299,23 @@ export class ShortestPathService {
     const distances = new Map<VertexId, number>();
     const predecessors = new Map<VertexId, VertexId | null>();
     const edges = graph.getEdges();
+    const isDirected = graph.getGraphType() === 'directed';
 
     for (const vertex of vertices) {
       distances.set(vertex, vertex === source ? 0 : Infinity);
       predecessors.set(vertex, null);
+    }
+
+    const edgeList = [...edges];
+    if (!isDirected) {
+      for (const edge of edges) {
+        edgeList.push({
+          source: edge.target,
+          target: edge.source,
+          weight: isWeighted ? edge.weight : 1,
+          id: `${edge.id}_reverse`,
+        });
+      }
     }
 
     const nodeCount = vertices.length;
@@ -296,8 +323,9 @@ export class ShortestPathService {
     for (let i = 0; i < nodeCount - 1; i++) {
       let hasUpdate = false;
 
-      for (const edge of edges) {
-        const { source: u, target: v, weight } = edge;
+      for (const edge of edgeList) {
+        const { source: u, target: v } = edge;
+        const weight = isWeighted ? edge.weight : 1;
         const distanceU = distances.get(u)!;
         const distanceV = distances.get(v)!;
 
@@ -313,8 +341,9 @@ export class ShortestPathService {
       }
     }
 
-    for (const edge of edges) {
-      const { source: u, target: v, weight } = edge;
+    for (const edge of edgeList) {
+      const { source: u, target: v } = edge;
+      const weight = isWeighted ? edge.weight : 1;
       const distanceU = distances.get(u)!;
       const distanceV = distances.get(v)!;
 
@@ -343,13 +372,14 @@ export class ShortestPathService {
     graph: GraphAPI,
     source: VertexId,
     target: VertexId,
-    algorithm: ShortestPathAlgorithm = 'dijkstra'
+    algorithm: ShortestPathAlgorithm = 'dijkstra',
+    isWeighted: boolean = true
   ): ShortestPathResult | ShortestPathError {
     switch (algorithm) {
       case 'dijkstra':
-        return this.dijkstra(graph, source, target);
+        return this.dijkstra(graph, source, target, isWeighted);
       case 'bellman-ford':
-        return this.bellmanFord(graph, source, target);
+        return this.bellmanFord(graph, source, target, isWeighted);
       default:
         return {
           type: 'validation',

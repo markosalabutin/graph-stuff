@@ -16,6 +16,8 @@ interface EdgeProps {
   isWeighted?: boolean;
   isMSTEdge?: boolean;
   isMSTVisualizationActive?: boolean;
+  isShortestPathEdge?: boolean;
+  isShortestPathVisualizationActive?: boolean;
   onEdgeClick?: (edgeId: EdgeId) => void;
   onWeightClick?: (edgeId: EdgeId, currentWeight: Weight) => void;
 }
@@ -33,6 +35,8 @@ export const Edge: React.FC<EdgeProps> = ({
   isWeighted = false,
   isMSTEdge = false,
   isMSTVisualizationActive = false,
+  isShortestPathEdge = false,
+  isShortestPathVisualizationActive = false,
   onEdgeClick,
   onWeightClick,
 }) => {
@@ -72,12 +76,19 @@ export const Edge: React.FC<EdgeProps> = ({
       edgeClass += ` ${styles.deletable}`;
     }
 
-    // Add MST visualization classes
     if (isMSTVisualizationActive) {
       if (isMSTEdge) {
         edgeClass += ` ${styles.mstEdge}`;
       } else {
         edgeClass += ` ${styles.nonMstEdge}`;
+      }
+    }
+
+    if (isShortestPathVisualizationActive) {
+      if (isShortestPathEdge) {
+        edgeClass += ` ${styles.shortestPathEdge}`;
+      } else {
+        edgeClass += ` ${styles.nonShortestPathEdge}`;
       }
     }
 

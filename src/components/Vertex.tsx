@@ -11,6 +11,10 @@ interface VertexProps {
   isSourceVertex: boolean;
   isHoveredTarget: boolean;
   isInDeleteMode?: boolean;
+  isShortestPathSource?: boolean;
+  isShortestPathTarget?: boolean;
+  isShortestPathVertex?: boolean;
+  isShortestPathVisualizationActive?: boolean;
   onMouseDown: (event: React.MouseEvent, vertexId: VertexId) => void;
   onMouseEnter: (vertexId: VertexId) => void;
   onMouseLeave: () => void;
@@ -24,6 +28,10 @@ export const Vertex: React.FC<VertexProps> = ({
   isSourceVertex,
   isHoveredTarget,
   isInDeleteMode = false,
+  isShortestPathSource = false,
+  isShortestPathTarget = false,
+  isShortestPathVertex = false,
+  isShortestPathVisualizationActive = false,
   onMouseDown,
   onMouseEnter,
   onMouseLeave,
@@ -44,6 +52,19 @@ export const Vertex: React.FC<VertexProps> = ({
     // Add delete mode class for hover styling, but don't change base color
     if (isInDeleteMode) {
       vertexClass += ` ${styles.deletable}`;
+    }
+
+    // Add shortest path visualization classes
+    if (isShortestPathVisualizationActive) {
+      if (isShortestPathSource) {
+        vertexClass += ` ${styles.shortestPathSource}`;
+      } else if (isShortestPathTarget) {
+        vertexClass += ` ${styles.shortestPathTarget}`;
+      } else if (isShortestPathVertex) {
+        vertexClass += ` ${styles.shortestPathVertex}`;
+      } else {
+        vertexClass += ` ${styles.nonShortestPathVertex}`;
+      }
     }
     
     return vertexClass;

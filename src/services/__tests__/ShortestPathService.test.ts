@@ -25,14 +25,16 @@ const createMockGraph = (
 
 describe('ShortestPathService', () => {
   describe('Graph Validation', () => {
-    it('should reject undirected graphs', () => {
+    it('should work with undirected graphs', () => {
       const graph = createMockGraph(['A', 'B'], [{ source: 'A', target: 'B', weight: 1 }], 'undirected');
       
       const result = ShortestPathService.dijkstra(graph, 'A', 'B');
       
       expect(result).toEqual({
-        type: 'validation',
-        message: 'Shortest path algorithms require directed graphs'
+        distances: new Map([['A', 0], ['B', 1]]),
+        predecessors: new Map([['A', null], ['B', 'A']]),
+        path: ['A', 'B'],
+        totalDistance: 1
       });
     });
 

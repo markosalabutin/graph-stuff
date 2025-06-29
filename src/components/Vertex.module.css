@@ -56,6 +56,41 @@
   100% { transform: scale(1); }
 }
 
+@keyframes pathGlow {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
+  }
+}
+
 .vertex:active {
   cursor: grabbing;
+}
+
+/* Shortest Path Visualization Styles */
+.vertex.shortestPathSource {
+  background-color: #007bff;
+  animation: pathGlow 2s infinite;
+  border-color: #0056b3;
+  transform: scale(1.1);
+}
+
+.vertex.shortestPathTarget {
+  background-color: #dc3545;
+  animation: pathGlow 2s infinite;
+  border-color: #a71e2a;
+  transform: scale(1.1);
+}
+
+.vertex.shortestPathVertex {
+  background-color: #17a2b8;
+  animation: pathGlow 2s infinite;
+  border-color: #117a8b;
+}
+
+.vertex.nonShortestPathVertex {
+  background-color: #6c757d;
+  opacity: 0.4;
 }

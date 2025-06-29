@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useGraph } from '../context/GraphContext';
 import { useMSTContext } from '../context/MSTContext';
+import { useVisualizationMode } from '../context/VisualizationModeContext';
 import { computeMST } from '../services/MinimumSpanningTreeService';
 import { Accordion } from './Accordion';
 import { RadioGroup } from './RadioGroup';
@@ -18,12 +19,14 @@ export const MSTVisualization: React.FC<MSTVisualizationProps> = ({
 }) => {
   const graph = useGraph();
   const { setMstEdgeIds, setMSTVisualizationActive } = useMSTContext();
+  const { activeMode, setActiveMode } = useVisualizationMode();
   const [selectedAlgorithm, setSelectedAlgorithm] =
     useState<MSTAlgorithm>('kruskal');
-  const [showMSTColors, setShowMSTColors] = useState(false);
+
+  const isAccordionOpen = activeMode === 'mst';
 
   const mstResult = useMemo(() => {
-    if (!showMSTColors) return null;
+    if (!isAccordionOpen) return null;
 
     try {
       const mockGraph = {
@@ -47,37 +50,45 @@ export const MSTVisualization: React.FC<MSTVisualizationProps> = ({
         },
       };
     }
-  }, [graph, selectedAlgorithm, showMSTColors, isWeighted]);
+  }, [graph, selectedAlgorithm, isWeighted, isAccordionOpen]);
 
   const handleAlgorithmChange = useCallback((algorithm: MSTAlgorithm) => {
     setSelectedAlgorithm(algorithm);
   }, []);
 
-  const handleMSTToggle = useCallback(
-    (enabled: boolean) => {
-      setShowMSTColors(enabled);
-      setMSTVisualizationActive(enabled);
+  const handleAccordionToggle = useCallback(
+    (isOpen: boolean) => {
+      setActiveMode(isOpen ? 'mst' : 'none');
 
-      if (enabled && mstResult?.success) {
+      setMSTVisualizationActive(isOpen);
+
+      if (!isOpen) {
+        setMstEdgeIds(new Set());
+      } else if (mstResult?.success) {
         const mstEdgeIds = new Set(
           mstResult.result.edges.map((edge) => edge.id)
         );
         setMstEdgeIds(mstEdgeIds);
-      } else {
-        setMstEdgeIds(new Set());
       }
     },
-    [setMSTVisualizationActive, setMstEdgeIds, mstResult]
+    [setMSTVisualizationActive, setMstEdgeIds, mstResult, setActiveMode]
   );
 
   useEffect(() => {
-    if (showMSTColors && mstResult?.success) {
+    if (isAccordionOpen && mstResult?.success) {
       const mstEdgeIds = new Set(mstResult.result.edges.map((edge) => edge.id));
       setMstEdgeIds(mstEdgeIds);
     } else {
       setMstEdgeIds(new Set());
     }
-  }, [mstResult, showMSTColors, setMstEdgeIds]);
+  }, [mstResult, isAccordionOpen, setMstEdgeIds]);
+
+  useEffect(() => {
+    if (activeMode !== 'mst') {
+      setMSTVisualizationActive(false);
+      setMstEdgeIds(new Set());
+    }
+  }, [activeMode, setMSTVisualizationActive, setMstEdgeIds]);
 
   const algorithms: RadioOption<MSTAlgorithm>[] = [
     { value: 'kruskal' as const, label: 'Kruskal', color: '#6f42c1' },
@@ -85,8 +96,6 @@ export const MSTVisualization: React.FC<MSTVisualizationProps> = ({
   ];
 
   const renderMSTResult = () => {
-    if (!showMSTColors) return null;
-
     if (!mstResult) return null;
 
     if (!mstResult.success) {
@@ -138,7 +147,12 @@ export const MSTVisualization: React.FC<MSTVisualizationProps> = ({
   };
 
   return (
-    <Accordion title="Minimum Spanning Tree" className={styles.mstAccordion}>
+    <Accordion
+      title="Minimum Spanning Tree"
+      className={styles.mstAccordion}
+      isExpanded={isAccordionOpen}
+      onToggle={handleAccordionToggle}
+    >
       <div className={styles.section}>
         <h4 className={styles.sectionTitle}>Algorithm</h4>
         <div className={styles.algorithmToggle}>
@@ -151,23 +165,6 @@ export const MSTVisualization: React.FC<MSTVisualizationProps> = ({
             variant="full-width"
           />
         </div>
-      </div>
-
-      <div className={styles.section}>
-        <h4 className={styles.sectionTitle}>Visualization</h4>
-        <label className={styles.toggleLabel}>
-          <span className={styles.toggleText}>Show MST Colors</span>
-          <div className={styles.toggleSwitch}>
-            <input
-              type="checkbox"
-              checked={showMSTColors}
-              onChange={(e) => handleMSTToggle(e.target.checked)}
-              className={styles.toggleInput}
-              aria-label="Show MST edge colors"
-            />
-            <span className={styles.toggleSlider}></span>
-          </div>
-        </label>
       </div>
 
       {renderMSTResult()}
