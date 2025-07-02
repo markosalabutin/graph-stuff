@@ -73,3 +73,66 @@
 .toggleInput:checked + .toggleSlider:before {
   transform: translateX(18px);
 }
+
+/* Complete Graph Generator */
+.generateSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.generateLabel {
+  color: #333;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.generateControls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.numberInput {
+  width: 50px;
+  padding: 6px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: white;
+  text-align: center;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.numberInput:focus {
+  outline: none;
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.generateButton {
+  padding: 6px 12px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  white-space: nowrap;
+}
+
+.generateButton:hover {
+  background-color: #5a6268;
+}
+
+.generateButton:active {
+  background-color: #545b62;
+}
+
+.generateButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.5);
+}

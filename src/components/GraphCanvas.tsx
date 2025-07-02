@@ -2,12 +2,16 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useGraph } from '../context/GraphContext';
 import { useMSTContext } from '../context/MSTContext';
 import { useShortestPath } from '../context/ShortestPathContext';
+import { useGraphColoring } from '../context/GraphColoringContext';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
+import { getColorByIndex } from '../constants/colorPalette';
+import { generateCompleteGraph } from '../services/GraphGeneratorService';
 import { ModeSelector } from './ModeSelector';
 import { GraphOptions } from './GraphOptions';
 import { MSTVisualization } from './MSTVisualization';
 import { ShortestPathVisualization } from './ShortestPathVisualization';
 import { AllPairsShortestPathVisualization } from './AllPairsShortestPathVisualization';
+import { GraphColoringVisualization } from './GraphColoringVisualization';
 import { InstructionText } from './InstructionText';
 import { Edge } from './Edge';
 import { Vertex } from './Vertex';
@@ -49,6 +53,7 @@ export const GraphCanvas: React.FC = () => {
   const { mstEdgeIds, isMSTVisualizationActive } = useMSTContext();
   const { state: shortestPathState, actions: shortestPathActions } =
     useShortestPath();
+  const { coloringResult, isActive: isColoringActive } = useGraphColoring();
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const vertices = getVertices();
@@ -127,6 +132,33 @@ export const GraphCanvas: React.FC = () => {
   const handleWeightedChange = useCallback((newIsWeighted: boolean) => {
     setIsWeighted(newIsWeighted);
   }, []);
+
+  const handleGenerateCompleteGraph = useCallback((n: number) => {
+    try {
+      generateCompleteGraph(
+        {
+          addVertex,
+          getVertex: (id: VertexId) => {
+            const vertices = getVertices();
+            return vertices.includes(id) ? id : null;
+          },
+          getVertices,
+          getEdges,
+          addEdge,
+          setEdgeWeight,
+          removeVertex,
+          removeEdge,
+          transitionGraphType,
+          getGraphType,
+        },
+        n,
+        positions,
+        setPositions
+      );
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to generate complete graph');
+    }
+  }, [addVertex, getVertices, getEdges, addEdge, setEdgeWeight, removeVertex, removeEdge, transitionGraphType, getGraphType, positions, setPositions]);
 
   const handleEscapeEdgeCreation = useCallback(() => {
     setEdgeCreationState((prev) => ({
@@ -535,10 +567,12 @@ export const GraphCanvas: React.FC = () => {
             onDirectedChange={handleGraphTypeChange}
             isWeighted={isWeighted}
             onWeightedChange={handleWeightedChange}
+            onGenerateCompleteGraph={handleGenerateCompleteGraph}
           />
           <MSTVisualization isWeighted={isWeighted} />
           <ShortestPathVisualization isWeighted={isWeighted} />
           <AllPairsShortestPathVisualization isWeighted={isWeighted} />
+          <GraphColoringVisualization />
         </div>
         <div className={styles.rightControls}>
           <ModeSelector
@@ -578,6 +612,15 @@ export const GraphCanvas: React.FC = () => {
           const position = positions[vertexId];
           if (!position) return null;
 
+          // Graph coloring
+          const getVertexColor = (): string | undefined => {
+            if (!isColoringActive || !coloringResult) return undefined;
+            const colorIndex = coloringResult.coloring.get(vertexId);
+            if (colorIndex === undefined) return undefined;
+            return getColorByIndex(colorIndex);
+          };
+
+          // Shortest path
           const isShortestPathSource =
             shortestPathState.sourceVertex === vertexId;
           const isShortestPathTarget =
@@ -602,6 +645,8 @@ export const GraphCanvas: React.FC = () => {
               isShortestPathTarget={isShortestPathTarget}
               isShortestPathVertex={isShortestPathVertex}
               isShortestPathVisualizationActive={shortestPathState.isVisualizationActive}
+              isColoringActive={isColoringActive}
+              coloringColor={getVertexColor()}
               onMouseDown={handleMouseDown}
               onMouseEnter={handleVertexMouseEnter}
               onMouseLeave={handleVertexMouseLeave}

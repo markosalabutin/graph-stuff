@@ -5,6 +5,7 @@ import { MSTProvider } from '../../context/MSTProvider';
 import { ShortestPathProvider } from '../../context/ShortestPathProvider';
 import { VisualizationModeProvider } from '../../context/VisualizationModeProvider';
 import { GraphCanvas } from '../GraphCanvas';
+import { GraphColoringProvider } from '../../context/GraphColoringProvider';
 
 const renderWithProvider = (component: React.ReactElement) => {
   return render(
@@ -12,7 +13,7 @@ const renderWithProvider = (component: React.ReactElement) => {
       <VisualizationModeProvider>
         <MSTProvider>
           <ShortestPathProvider>
-            {component}
+            <GraphColoringProvider>{component}</GraphColoringProvider>
           </ShortestPathProvider>
         </MSTProvider>
       </VisualizationModeProvider>
@@ -260,18 +261,20 @@ describe('Weight Click Integration', () => {
     const vertexMode = screen.getByRole('radio', { name: /vertex/i });
     fireEvent.click(vertexMode);
 
-    const canvas = document.querySelector('[class*="canvasArea"]') as HTMLElement;
+    const canvas = document.querySelector(
+      '[class*="canvasArea"]'
+    ) as HTMLElement;
     expect(canvas).toBeInTheDocument();
 
-    fireEvent.click(canvas, { 
+    fireEvent.click(canvas, {
       bubbles: true,
-      clientX: 100, 
-      clientY: 100 
+      clientX: 100,
+      clientY: 100,
     });
-    fireEvent.click(canvas, { 
+    fireEvent.click(canvas, {
       bubbles: true,
-      clientX: 200, 
-      clientY: 200 
+      clientX: 200,
+      clientY: 200,
     });
 
     const edgeMode = screen.getByRole('radio', { name: /edge/i });
@@ -299,8 +302,10 @@ describe('Weight Click Integration', () => {
     fireEvent.click(deleteMode);
 
     expect(deleteMode).toBeChecked();
-    expect(screen.getByText(/delete mode: click vertex or edge to delete/i)).toBeInTheDocument();
-    
+    expect(
+      screen.getByText(/delete mode: click vertex or edge to delete/i)
+    ).toBeInTheDocument();
+
     expect(weightedToggle).toBeChecked();
   });
 });
@@ -312,43 +317,43 @@ describe('Keyboard Shortcuts', () => {
 
   it('should toggle directed/undirected mode with G key', () => {
     renderWithProvider(<GraphCanvas />);
-    
+
     const directedToggle = screen.getByLabelText(/directed graph/i);
     expect(directedToggle).not.toBeChecked();
-    
+
     fireEvent.keyDown(document, { key: 'g' });
     expect(directedToggle).toBeChecked();
-    
+
     fireEvent.keyDown(document, { key: 'G' });
     expect(directedToggle).not.toBeChecked();
   });
 
   it('should toggle weighted/unweighted mode with W key', () => {
     renderWithProvider(<GraphCanvas />);
-    
+
     const weightedToggle = screen.getByLabelText(/weighted graph/i);
     expect(weightedToggle).not.toBeChecked();
-    
+
     fireEvent.keyDown(document, { key: 'w' });
     expect(weightedToggle).toBeChecked();
-    
+
     fireEvent.keyDown(document, { key: 'W' });
     expect(weightedToggle).not.toBeChecked();
   });
 
   it('should not trigger shortcuts when typing in input fields', () => {
     renderWithProvider(<GraphCanvas />);
-    
+
     const mockInput = document.createElement('input');
     document.body.appendChild(mockInput);
     mockInput.focus();
-    
+
     const directedToggle = screen.getByLabelText(/directed graph/i);
     expect(directedToggle).not.toBeChecked();
-    
+
     fireEvent.keyDown(mockInput, { key: 'g' });
     expect(directedToggle).not.toBeChecked();
-    
+
     document.body.removeChild(mockInput);
   });
 });

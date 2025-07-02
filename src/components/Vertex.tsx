@@ -15,6 +15,8 @@ interface VertexProps {
   isShortestPathTarget?: boolean;
   isShortestPathVertex?: boolean;
   isShortestPathVisualizationActive?: boolean;
+  isColoringActive?: boolean;
+  coloringColor?: string;
   onMouseDown: (event: React.MouseEvent, vertexId: VertexId) => void;
   onMouseEnter: (vertexId: VertexId) => void;
   onMouseLeave: () => void;
@@ -32,6 +34,8 @@ export const Vertex: React.FC<VertexProps> = ({
   isShortestPathTarget = false,
   isShortestPathVertex = false,
   isShortestPathVisualizationActive = false,
+  isColoringActive = false,
+  coloringColor,
   onMouseDown,
   onMouseEnter,
   onMouseLeave,
@@ -79,6 +83,10 @@ export const Vertex: React.FC<VertexProps> = ({
       style={{
         left: x - VERTEX_RADIUS,
         top: y - VERTEX_RADIUS,
+        ...(isColoringActive && coloringColor && {
+          backgroundColor: coloringColor,
+          borderColor: coloringColor,
+        }),
       }}
     >
       {id}
