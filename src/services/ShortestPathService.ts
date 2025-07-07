@@ -1,6 +1,7 @@
-import type { VertexId, Weight } from '../domain/Graph';
+import type { VertexId } from '../domain/Graph';
 import type { GraphAPI } from '../context/GraphContext';
 import { PriorityQueue } from '../utils/PriorityQueue';
+import { GraphUtils } from '../utils/GraphUtils';
 
 export type ShortestPathAlgorithm = 'dijkstra' | 'bellman-ford';
 
@@ -58,25 +59,7 @@ export class ShortestPathService {
 
     const visited = new Set<VertexId>();
     const queue = [source];
-    const edges = graph.getEdges();
-    const isDirected = graph.getGraphType() === 'directed';
-
-    const adjacencyList = new Map<VertexId, VertexId[]>();
-    for (const edge of edges) {
-      // Add forward edge
-      if (!adjacencyList.has(edge.source)) {
-        adjacencyList.set(edge.source, []);
-      }
-      adjacencyList.get(edge.source)!.push(edge.target);
-
-      // For undirected graphs, add reverse edge
-      if (!isDirected) {
-        if (!adjacencyList.has(edge.target)) {
-          adjacencyList.set(edge.target, []);
-        }
-        adjacencyList.get(edge.target)!.push(edge.source);
-      }
-    }
+    const adjacencyList = GraphUtils.buildAdjacencyList(graph);
 
     while (queue.length > 0) {
       const current = queue.shift()!;
@@ -91,7 +74,7 @@ export class ShortestPathService {
 
       visited.add(current);
 
-      const neighbors = adjacencyList.get(current) || [];
+      const neighbors = adjacencyList.get(current) || new Set();
       for (const neighbor of neighbors) {
         if (!visited.has(neighbor)) {
           queue.push(neighbor);
@@ -172,35 +155,13 @@ export class ShortestPathService {
     const distances = new Map<VertexId, number>();
     const predecessors = new Map<VertexId, VertexId | null>();
     const visited = new Set<VertexId>();
-    const edges = graph.getEdges();
-    const isDirected = graph.getGraphType() === 'directed';
 
     for (const vertex of vertices) {
       distances.set(vertex, vertex === source ? 0 : Infinity);
       predecessors.set(vertex, null);
     }
 
-    const adjacencyList = new Map<
-      VertexId,
-      Array<{ target: VertexId; weight: Weight }>
-    >();
-    for (const edge of edges) {
-      if (!adjacencyList.has(edge.source)) {
-        adjacencyList.set(edge.source, []);
-      }
-      adjacencyList
-        .get(edge.source)!
-        .push({ target: edge.target, weight: isWeighted ? edge.weight : 1 });
-
-      if (!isDirected) {
-        if (!adjacencyList.has(edge.target)) {
-          adjacencyList.set(edge.target, []);
-        }
-        adjacencyList
-          .get(edge.target)!
-          .push({ target: edge.source, weight: isWeighted ? edge.weight : 1 });
-      }
-    }
+    const adjacencyList = GraphUtils.buildWeightedAdjacencyList(graph, isWeighted);
 
     const pq = new PriorityQueue<{ node: VertexId; distance: number }>();
 

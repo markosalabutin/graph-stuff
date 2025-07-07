@@ -1,5 +1,6 @@
 import type { VertexId } from '../domain/Graph';
 import type { GraphAPI } from '../context/GraphContext';
+import { GraphUtils } from '../utils/GraphUtils';
 
 export interface ColoringResult {
   coloring: Map<VertexId, number>;
@@ -26,12 +27,11 @@ export class GraphColoringService {
 
     const coloring = new Map<VertexId, number>();
     const saturation = new Map<VertexId, number>();
-    const degree = new Map<VertexId, number>();
     const adjacentColors = new Map<VertexId, Set<number>>();
+    const vertexDegrees = GraphUtils.calculateVertexDegrees(graph);
     
     for (const vertex of vertices) {
       saturation.set(vertex, 0);
-      degree.set(vertex, this.getVertexDegree(graph, vertex));
       adjacentColors.set(vertex, new Set());
     }
 
@@ -40,7 +40,7 @@ export class GraphColoringService {
     while (uncolored.size > 0) {
       // Select vertex with highest saturation degree
       // Break ties by selecting vertex with highest degree
-      const selectedVertex = this.selectNextVertex(uncolored, saturation, degree);
+      const selectedVertex = this.selectNextVertex(uncolored, saturation, vertexDegrees);
       
       // Find the smallest available color
       const color = this.getSmallestAvailableColor(adjacentColors.get(selectedVertex)!);
@@ -71,16 +71,6 @@ export class GraphColoringService {
   }
 
   /**
-   * Get the degree of a vertex (number of adjacent vertices)
-   */
-  private static getVertexDegree(graph: GraphAPI, vertexId: VertexId): number {
-    const edges = graph.getEdges();
-    return edges.filter(edge => 
-      (edge.source === vertexId || edge.target === vertexId) && edge.source !== edge.target
-    ).length;
-  }
-
-  /**
    * Select the next vertex to color based on DSatur heuristic:
    * 1. Highest saturation degree (number of different colors used by neighbors)
    * 2. Break ties by highest degree
@@ -89,7 +79,7 @@ export class GraphColoringService {
   private static selectNextVertex(
     uncolored: Set<VertexId>,
     saturation: Map<VertexId, number>,
-    degree: Map<VertexId, number>
+    vertexDegrees: Map<VertexId, number>
   ): VertexId {
     let bestVertex = '';
     let bestSaturation = -1;
@@ -97,7 +87,7 @@ export class GraphColoringService {
 
     for (const vertex of uncolored) {
       const sat = saturation.get(vertex)!;
-      const deg = degree.get(vertex)!;
+      const deg = vertexDegrees.get(vertex)!;
       
       if (sat > bestSaturation || 
           (sat === bestSaturation && deg > bestDegree) ||
@@ -216,7 +206,8 @@ export class GraphColoringService {
     const cliqueLowerBound = this.findMaxCliqueLowerBound(graph);
     
     // Upper bound: DSatur typically gives good results, but theoretical upper bound is degree + 1
-    const maxDegree = Math.max(...vertices.map(v => this.getVertexDegree(graph, v)));
+    const vertexDegrees = GraphUtils.calculateVertexDegrees(graph);
+    const maxDegree = Math.max(...Array.from(vertexDegrees.values()));
     const upperBound = maxDegree + 1;
     
     return {

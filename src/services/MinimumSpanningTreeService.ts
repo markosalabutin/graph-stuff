@@ -2,7 +2,7 @@ import type { VertexId, EdgeId, Weight } from '../domain/Graph';
 import type { GraphAPI } from '../context/GraphContext';
 import { UnionFind } from '../utils/UnionFind';
 import { PriorityQueue } from '../utils/PriorityQueue';
-import { isGraphConnected } from '../utils/GraphConnectivity';
+import { GraphUtils } from '../utils/GraphUtils';
 
 export interface MSTEdge {
   id: EdgeId;
@@ -68,7 +68,7 @@ function validateAndCheckConnectivity(graph: GraphAPI): MSTError | null {
     return validationError;
   }
 
-  if (!isGraphConnected(graph)) {
+  if (!GraphUtils.isConnected(graph)) {
     return {
       type: 'not_connected',
       message: 'Graph must be connected to compute MST',
@@ -131,30 +131,10 @@ export function primMST(graph: GraphAPI, startVertex?: VertexId): MSTResponse {
   }
 
   const vertices = graph.getVertices();
-  const edges = graph.getEdges();
 
   const start = startVertex || vertices[0];
 
-  const adjacencyList = new Map<
-    VertexId,
-    Array<{ vertex: VertexId; weight: Weight; edgeId: EdgeId }>
-  >();
-  for (const vertex of vertices) {
-    adjacencyList.set(vertex, []);
-  }
-
-  for (const edge of edges) {
-    adjacencyList.get(edge.source)?.push({
-      vertex: edge.target,
-      weight: edge.weight,
-      edgeId: edge.id,
-    });
-    adjacencyList.get(edge.target)?.push({
-      vertex: edge.source,
-      weight: edge.weight,
-      edgeId: edge.id,
-    });
-  }
+  const adjacencyList = GraphUtils.buildWeightedAdjacencyListWithEdges(graph);
 
   const visited = new Set<VertexId>();
   const priorityQueue = new PriorityQueue<{
