@@ -14,13 +14,14 @@ import {
 import { transitionGraphType } from '../services/GraphTransitionService';
 import { type GraphAPI, GraphCtx } from './GraphContext';
 import type { VertexId, EdgeId, Graph, Weight } from '../domain/Graph';
+import type { GraphDTO } from '../domain/GraphDTO';
 
 export function GraphProvider({ children }: { children: ReactNode }) {
   const graphRef = useRef<Graph>(null);
   if (!graphRef.current) {
     graphRef.current = createGraph('undirected');
   }
-  const graph = graphRef.current!;
+  let graph = graphRef.current!;
 
   const [, bump] = useReducer((x) => x + 1, 0);
 
@@ -63,6 +64,19 @@ export function GraphProvider({ children }: { children: ReactNode }) {
     },
     getGraphType() {
       return graph.type as GraphType;
+    },
+    resetFromDTO(graphDTO: GraphDTO) {
+      const targetType = graphDTO.directed ? 'directed' : 'undirected';
+      graph = createGraph(targetType);
+      graphDTO.vertices.forEach((v) => {
+        addVertex(graph, v.id);
+      });
+      graphDTO.edges.forEach((e) => {
+        addEdge(graph, e.source, e.target);
+      });
+      graphRef.current = graph;
+
+      bump();
     },
   };
 

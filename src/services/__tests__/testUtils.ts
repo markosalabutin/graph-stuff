@@ -9,14 +9,19 @@ import type { GraphType } from '../../domain/GraphModel';
  */
 export const createMockGraph = (
   vertices: VertexId[],
-  edges: Array<{ id?: EdgeId; source: VertexId; target: VertexId; weight: Weight }>,
+  edges: Array<{
+    id?: EdgeId;
+    source: VertexId;
+    target: VertexId;
+    weight: Weight;
+  }>,
   graphType: GraphType = 'directed'
 ): GraphAPI => {
   const edgesWithIds = edges.map((edge, index) => ({
     id: edge.id || `e${index}`,
     source: edge.source,
     target: edge.target,
-    weight: edge.weight
+    weight: edge.weight,
   }));
 
   return {
@@ -30,6 +35,7 @@ export const createMockGraph = (
     removeVertex: vi.fn(),
     removeEdge: vi.fn(),
     transitionGraphType: vi.fn(),
+    resetFromDTO: vi.fn(),
   };
 };
 
@@ -39,16 +45,30 @@ export const createMockGraph = (
  */
 export class MockGraph implements GraphAPI {
   private vertices: VertexId[] = [];
-  private edges: Array<{id: EdgeId, source: VertexId, target: VertexId, weight: Weight}> = [];
+  private edges: Array<{
+    id: EdgeId;
+    source: VertexId;
+    target: VertexId;
+    weight: Weight;
+  }> = [];
   private graphType: GraphType = 'undirected';
 
-  constructor(initialVertices: VertexId[] = [], initialEdges: Array<{id?: EdgeId, source: VertexId, target: VertexId, weight: Weight}> = [], graphType: GraphType = 'undirected') {
+  constructor(
+    initialVertices: VertexId[] = [],
+    initialEdges: Array<{
+      id?: EdgeId;
+      source: VertexId;
+      target: VertexId;
+      weight: Weight;
+    }> = [],
+    graphType: GraphType = 'undirected'
+  ) {
     this.vertices = [...initialVertices];
     this.edges = initialEdges.map((edge, index) => ({
       id: edge.id || `e${index}`,
       source: edge.source,
       target: edge.target,
-      weight: edge.weight
+      weight: edge.weight,
     }));
     this.graphType = graphType;
   }
@@ -78,19 +98,19 @@ export class MockGraph implements GraphAPI {
   }
 
   setEdgeWeight(edgeId: EdgeId, weight: Weight): void {
-    const edge = this.edges.find(e => e.id === edgeId);
+    const edge = this.edges.find((e) => e.id === edgeId);
     if (edge) {
       edge.weight = weight;
     }
   }
 
   removeVertex(id: VertexId): void {
-    this.vertices = this.vertices.filter(v => v !== id);
-    this.edges = this.edges.filter(e => e.source !== id && e.target !== id);
+    this.vertices = this.vertices.filter((v) => v !== id);
+    this.edges = this.edges.filter((e) => e.source !== id && e.target !== id);
   }
 
   removeEdge(edgeId: EdgeId): void {
-    this.edges = this.edges.filter(e => e.id !== edgeId);
+    this.edges = this.edges.filter((e) => e.id !== edgeId);
   }
 
   transitionGraphType(targetType: GraphType): void {
@@ -99,5 +119,9 @@ export class MockGraph implements GraphAPI {
 
   getGraphType(): GraphType {
     return this.graphType;
+  }
+
+  resetFromDTO(): void {
+    // Mock implementation - can be customized per test if needed
   }
 }

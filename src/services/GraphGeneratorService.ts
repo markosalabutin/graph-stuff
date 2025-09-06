@@ -1,6 +1,26 @@
 import type { VertexId } from '../domain/Graph';
 import type { GraphAPI } from '../context/GraphContext';
 
+export const positionVerticesInCircle = (
+  vertexIds: VertexId[],
+  centerX: number = 700,
+  centerY: number = 500,
+  baseRadius: number = 150
+): Record<VertexId, { x: number; y: number }> => {
+  const n = vertexIds.length;
+  const radius = Math.min(baseRadius + n * 3, 250);
+  const positions: Record<VertexId, { x: number; y: number }> = {};
+
+  for (let i = 0; i < n; i++) {
+    const angle = (2 * Math.PI * i) / n;
+    const x = centerX + radius * Math.cos(angle);
+    const y = centerY + radius * Math.sin(angle);
+    positions[vertexIds[i]] = { x, y };
+  }
+
+  return positions;
+};
+
 export const generateCompleteGraph = (
   graph: GraphAPI,
   n: number,
@@ -14,20 +34,14 @@ export const generateCompleteGraph = (
   const vertices: VertexId[] = [];
   const newPositions = { ...positions };
 
-  const centerX = 700;
-  const centerY = 500;
-  const radius = Math.min(150 + n * 3, 250);
-
   for (let i = 0; i < n; i++) {
     const vertexId = graph.addVertex();
     vertices.push(vertexId);
-
-    const angle = (2 * Math.PI * i) / n;
-    const x = centerX + radius * Math.cos(angle);
-    const y = centerY + radius * Math.sin(angle);
-
-    newPositions[vertexId] = { x, y };
   }
+
+  // Use the extracted positioning function
+  const vertexPositions = positionVerticesInCircle(vertices);
+  Object.assign(newPositions, vertexPositions);
 
   const isDirected = graph.getGraphType() === 'directed';
   
