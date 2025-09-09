@@ -34,7 +34,6 @@ export const Vertex: React.FC<VertexProps> = ({
   isShortestPathTarget = false,
   isShortestPathVertex = false,
   isShortestPathVisualizationActive = false,
-  isColoringActive = false,
   coloringColor,
   onMouseDown,
   onMouseEnter,
@@ -83,7 +82,7 @@ export const Vertex: React.FC<VertexProps> = ({
       style={{
         left: x - VERTEX_RADIUS,
         top: y - VERTEX_RADIUS,
-        ...(isColoringActive && coloringColor && {
+        ...(coloringColor && {
           backgroundColor: coloringColor,
           borderColor: coloringColor,
         }),

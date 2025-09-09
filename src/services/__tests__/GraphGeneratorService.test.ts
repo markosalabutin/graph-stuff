@@ -15,7 +15,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { generateCompleteGraph } from '../GraphGeneratorService';
+import { generateCompleteGraph, positionVerticesInCircle } from '../GraphGeneratorService';
 import { MockGraph } from './testUtils';
 import type { VertexId } from '../../domain/Graph';
 
@@ -319,6 +319,57 @@ describe('GraphGeneratorService', () => {
           expect(graph.getEdges()).toHaveLength(expectedEdges);
         });
       });
+    });
+  });
+
+  describe('positionVerticesInCircle', () => {
+    it('should position single vertex at center with scaled radius', () => {
+      const vertices = ['v1'] as VertexId[];
+      const positions = positionVerticesInCircle(vertices, 100, 200, 50);
+      
+      // Radius = Math.min(50 + 1 * 3, 250) = 53
+      expect(positions['v1']).toEqual({ x: 153, y: 200 }); // center + radius
+    });
+
+    it('should position two vertices opposite each other', () => {
+      const vertices = ['v1', 'v2'] as VertexId[];
+      const positions = positionVerticesInCircle(vertices, 100, 100, 50);
+      
+      // Radius = Math.min(50 + 2 * 3, 250) = 56
+      expect(positions['v1']).toEqual({ x: 156, y: 100 }); // 0 degrees
+      expect(positions['v2']).toEqual({ x: 44, y: 100 });  // 180 degrees
+    });
+
+    it('should position three vertices in equilateral triangle', () => {
+      const vertices = ['v1', 'v2', 'v3'] as VertexId[];
+      const positions = positionVerticesInCircle(vertices, 0, 0, 100);
+      
+      // Radius = Math.min(100 + 3 * 3, 250) = 109
+      // Check that vertices are positioned at 120-degree intervals
+      expect(positions['v1'].x).toBeCloseTo(109); // 0 degrees
+      expect(positions['v1'].y).toBeCloseTo(0);
+      
+      expect(positions['v2'].x).toBeCloseTo(-54.5); // 120 degrees
+      expect(positions['v2'].y).toBeCloseTo(94.4, 1);
+      
+      expect(positions['v3'].x).toBeCloseTo(-54.5); // 240 degrees
+      expect(positions['v3'].y).toBeCloseTo(-94.4, 1);
+    });
+
+    it('should handle empty vertex array', () => {
+      const vertices = [] as VertexId[];
+      const positions = positionVerticesInCircle(vertices);
+      
+      expect(positions).toEqual({});
+    });
+
+    it('should use default values when not provided', () => {
+      const vertices = ['v1'] as VertexId[];
+      const positions = positionVerticesInCircle(vertices);
+      
+      // Default center (700, 500) and base radius 150
+      // Radius = Math.min(150 + 1 * 3, 250) = 153
+      expect(positions['v1']).toEqual({ x: 853, y: 500 }); // 700 + 153
     });
   });
 });

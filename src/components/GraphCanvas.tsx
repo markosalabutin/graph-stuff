@@ -5,7 +5,10 @@ import { useShortestPath } from '../context/ShortestPathContext';
 import { useGraphColoring } from '../context/GraphColoringContext';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { getColorByIndex } from '../constants/colorPalette';
-import { generateCompleteGraph } from '../services/GraphGeneratorService';
+import {
+  generateCompleteGraph,
+  positionVerticesInCircle,
+} from '../services/GraphGeneratorService';
 import { ModeSelector } from './ModeSelector';
 import { GraphOptions } from './GraphOptions';
 import { MSTVisualization } from './MSTVisualization';
@@ -13,12 +16,14 @@ import { ShortestPathVisualization } from './ShortestPathVisualization';
 import { AllPairsShortestPathVisualization } from './AllPairsShortestPathVisualization';
 import { GraphColoringVisualization } from './GraphColoringVisualization';
 import { InstructionText } from './InstructionText';
+import { GraphImport } from './GraphImport';
 import { Edge } from './Edge';
 import { Vertex } from './Vertex';
 import styles from './GraphCanvas.module.css';
 import type { VertexId, EdgeId, Weight } from '../domain/Graph';
 import { Mode } from '../constants/modes';
 import type { Mode as ModeType } from '../constants/modes';
+import { GraphImportService } from '../services/GraphImportService';
 
 interface VertexPosition {
   x: number;
@@ -39,6 +44,7 @@ interface EdgeCreationState {
 }
 
 export const GraphCanvas: React.FC = () => {
+  const graphApi = useGraph();
   const {
     addVertex,
     getVertices,
@@ -49,7 +55,7 @@ export const GraphCanvas: React.FC = () => {
     setEdgeWeight,
     transitionGraphType,
     getGraphType,
-  } = useGraph();
+  } = graphApi;
   const { mstEdgeIds, isMSTVisualizationActive } = useMSTContext();
   const { state: shortestPathState, actions: shortestPathActions } =
     useShortestPath();
@@ -67,6 +73,9 @@ export const GraphCanvas: React.FC = () => {
   const [positions, setPositions] = useState<Record<VertexId, VertexPosition>>(
     {}
   );
+  const [defaultVertexColors, setDefaultVertexColors] = useState<
+    Record<VertexId, string>
+  >({});
 
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
@@ -133,32 +142,31 @@ export const GraphCanvas: React.FC = () => {
     setIsWeighted(newIsWeighted);
   }, []);
 
-  const handleGenerateCompleteGraph = useCallback((n: number) => {
-    try {
-      generateCompleteGraph(
-        {
-          addVertex,
-          getVertex: (id: VertexId) => {
-            const vertices = getVertices();
-            return vertices.includes(id) ? id : null;
+  const handleGenerateCompleteGraph = useCallback(
+    (n: number) => {
+      try {
+        generateCompleteGraph(
+          {
+            ...graphApi,
+            getVertex: (id: VertexId) => {
+              const vertices = getVertices();
+              return vertices.includes(id) ? id : null;
+            },
           },
-          getVertices,
-          getEdges,
-          addEdge,
-          setEdgeWeight,
-          removeVertex,
-          removeEdge,
-          transitionGraphType,
-          getGraphType,
-        },
-        n,
-        positions,
-        setPositions
-      );
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to generate complete graph');
-    }
-  }, [addVertex, getVertices, getEdges, addEdge, setEdgeWeight, removeVertex, removeEdge, transitionGraphType, getGraphType, positions, setPositions]);
+          n,
+          positions,
+          setPositions
+        );
+      } catch (error) {
+        alert(
+          error instanceof Error
+            ? error.message
+            : 'Failed to generate complete graph'
+        );
+      }
+    },
+    [graphApi, getVertices, positions, setPositions]
+  );
 
   const handleEscapeEdgeCreation = useCallback(() => {
     setEdgeCreationState((prev) => ({
@@ -168,6 +176,46 @@ export const GraphCanvas: React.FC = () => {
       hoveredVertex: null,
     }));
   }, []);
+
+  const handleImport = useCallback(
+    (file: File) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const jsonContent = event.target?.result as string;
+          const result = GraphImportService.parseGraphDTOFromJson(jsonContent);
+
+          if (!result.success || !result.graphData) {
+            alert(result.error || 'Failed to import graph');
+            return;
+          }
+
+          const data = result.graphData;
+          graphApi.resetFromDTO(data);
+          setIsDirected(data.directed);
+
+          const importedColors: Record<VertexId, string> = {};
+          data.vertices.forEach((vertex) => {
+            if (vertex.color) {
+              importedColors[vertex.id] = vertex.color;
+            }
+          });
+          setDefaultVertexColors(importedColors);
+
+          const vertices = getVertices();
+          const vertexPositions = positionVerticesInCircle(vertices);
+          setPositions(vertexPositions);
+        } catch (error) {
+          alert(
+            "Failed to parse JSON file. Please ensure it's a valid JSON format."
+          );
+          console.error('Import error:', error);
+        }
+      };
+      reader.readAsText(file);
+    },
+    [graphApi, getVertices, setPositions]
+  );
 
   useKeyboardShortcuts({
     currentMode,
@@ -250,10 +298,9 @@ export const GraphCanvas: React.FC = () => {
           return;
         }
 
-        return; // Exit early to prevent other mode handling
+        return;
       }
 
-      // Handle delete mode
       if (currentMode === Mode.DELETE) {
         removeVertex(vertexId);
         setPositions((prev) => {
@@ -264,7 +311,6 @@ export const GraphCanvas: React.FC = () => {
         return;
       }
 
-      // Handle edge creation mode
       if (currentMode === Mode.EDGE) {
         if (edgeCreationState.sourceVertex === null) {
           setEdgeCreationState((prev) => ({
@@ -514,7 +560,9 @@ export const GraphCanvas: React.FC = () => {
         isMSTEdge={mstEdgeIds.has(edge.id)}
         isMSTVisualizationActive={isMSTVisualizationActive}
         isShortestPathEdge={isShortestPathEdge}
-        isShortestPathVisualizationActive={shortestPathState.isVisualizationActive}
+        isShortestPathVisualizationActive={
+          shortestPathState.isVisualizationActive
+        }
         onEdgeClick={handleEdgeClick}
         onWeightClick={
           isWeighted && currentMode !== Mode.DELETE
@@ -586,6 +634,8 @@ export const GraphCanvas: React.FC = () => {
         Vertices: {vertices.length} • Edges: {edges.length}
       </div>
 
+      <GraphImport onImport={handleImport} />
+
       <div
         ref={canvasRef}
         onClick={handleAddVertex}
@@ -612,12 +662,15 @@ export const GraphCanvas: React.FC = () => {
           const position = positions[vertexId];
           if (!position) return null;
 
-          // Graph coloring
           const getVertexColor = (): string | undefined => {
-            if (!isColoringActive || !coloringResult) return undefined;
-            const colorIndex = coloringResult.coloring.get(vertexId);
-            if (colorIndex === undefined) return undefined;
-            return getColorByIndex(colorIndex);
+            if (isColoringActive && coloringResult) {
+              const colorIndex = coloringResult.coloring.get(vertexId);
+              if (colorIndex !== undefined) {
+                return getColorByIndex(colorIndex);
+              }
+            }
+
+            return defaultVertexColors[vertexId];
           };
 
           // Shortest path
@@ -644,7 +697,9 @@ export const GraphCanvas: React.FC = () => {
               isShortestPathSource={isShortestPathSource}
               isShortestPathTarget={isShortestPathTarget}
               isShortestPathVertex={isShortestPathVertex}
-              isShortestPathVisualizationActive={shortestPathState.isVisualizationActive}
+              isShortestPathVisualizationActive={
+                shortestPathState.isVisualizationActive
+              }
               isColoringActive={isColoringActive}
               coloringColor={getVertexColor()}
               onMouseDown={handleMouseDown}

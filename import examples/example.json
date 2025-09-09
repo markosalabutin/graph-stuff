@@ -1,0 +1,55 @@
+{
+    "directed": true,
+    "vertices": [
+        {
+            "id": "{a,b}",
+            "color": "red"
+        },
+        {
+            "id": "{b,c}",
+            "color": "red"
+        },
+        {
+            "id": "{a,c}",
+            "color": "red"
+        },
+        {
+            "id": "{a}",
+            "color": "red"
+        },
+        {
+            "id": "{b}",
+            "color": "red"
+        },
+        {
+            "id": "{c}",
+            "color": "red"
+        }
+    ],
+    "edges": [
+        {
+            "source": "{a}",
+            "target": "{a}"
+        },
+        {
+            "source": "{b}",
+            "target": "{c}"
+        },
+        {
+            "source": "{c}",
+            "target": "{b}"
+        },
+        {
+            "source": "{a,b}",
+            "target": "{b}"
+        },
+        {
+            "source": "{b,c}",
+            "target": "{a}"
+        },
+        {
+            "source": "{a,c}",
+            "target": "{c}"
+        }
+    ]
+}
