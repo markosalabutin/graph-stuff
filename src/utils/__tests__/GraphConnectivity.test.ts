@@ -1,16 +1,24 @@
 import { describe, it, expect, vi } from 'vitest';
-import { isGraphConnected, isDirectedGraphStronglyConnected } from '../GraphConnectivity';
+import {
+  isGraphConnected,
+  isDirectedGraphStronglyConnected,
+} from '../GraphConnectivity';
 import type { GraphAPI } from '../../context/GraphContext';
 import type { VertexId, EdgeId } from '../../domain/Graph';
 import type { GraphType } from '../../domain/GraphModel';
 
 const createMockGraph = (
   vertices: VertexId[],
-  edges: Array<{ id: EdgeId; source: VertexId; target: VertexId; weight?: number }>,
+  edges: Array<{
+    id: EdgeId;
+    source: VertexId;
+    target: VertexId;
+    weight?: number;
+  }>,
   graphType: GraphType = 'undirected'
 ): GraphAPI => ({
   getVertices: () => vertices,
-  getEdges: () => edges.map(edge => ({ ...edge, weight: edge.weight ?? 1 })),
+  getEdges: () => edges.map((edge) => ({ ...edge, weight: edge.weight ?? 1 })),
   getGraphType: () => graphType,
   addVertex: vi.fn(),
   addEdge: vi.fn(),
@@ -18,7 +26,8 @@ const createMockGraph = (
   removeEdge: vi.fn(),
   setEdgeWeight: vi.fn(),
   transitionGraphType: vi.fn(),
-  getVertex: vi.fn()
+  getVertex: vi.fn(),
+  resetFromDTO: vi.fn(),
 });
 
 describe('GraphConnectivity', () => {
@@ -52,7 +61,7 @@ describe('GraphConnectivity', () => {
         [
           { id: 'e1', source: 'A', target: 'B' },
           { id: 'e2', source: 'B', target: 'C' },
-          { id: 'e3', source: 'A', target: 'C' }
+          { id: 'e3', source: 'A', target: 'C' },
         ]
       );
       expect(isGraphConnected(graph)).toBe(true);
@@ -64,7 +73,7 @@ describe('GraphConnectivity', () => {
         [
           { id: 'e1', source: 'A', target: 'B' },
           { id: 'e2', source: 'B', target: 'C' },
-          { id: 'e3', source: 'C', target: 'D' }
+          { id: 'e3', source: 'C', target: 'D' },
         ]
       );
       expect(isGraphConnected(graph)).toBe(true);
@@ -75,7 +84,7 @@ describe('GraphConnectivity', () => {
         ['A', 'B', 'C', 'D'],
         [
           { id: 'e1', source: 'A', target: 'B' },
-          { id: 'e2', source: 'C', target: 'D' }
+          { id: 'e2', source: 'C', target: 'D' },
         ]
       );
       expect(isGraphConnected(graph)).toBe(false);
@@ -97,7 +106,7 @@ describe('GraphConnectivity', () => {
           { id: 'e2', source: 'B', target: 'C' },
           { id: 'e3', source: 'C', target: 'D' },
           { id: 'e4', source: 'D', target: 'E' },
-          { id: 'e5', source: 'E', target: 'A' }
+          { id: 'e5', source: 'E', target: 'A' },
         ]
       );
       expect(isGraphConnected(graph)).toBe(true);
@@ -120,7 +129,7 @@ describe('GraphConnectivity', () => {
         ['A', 'B'],
         [
           { id: 'e1', source: 'A', target: 'B' },
-          { id: 'e2', source: 'B', target: 'A' }
+          { id: 'e2', source: 'B', target: 'A' },
         ],
         'directed'
       );
@@ -142,7 +151,7 @@ describe('GraphConnectivity', () => {
         [
           { id: 'e1', source: 'A', target: 'B' },
           { id: 'e2', source: 'B', target: 'C' },
-          { id: 'e3', source: 'C', target: 'A' }
+          { id: 'e3', source: 'C', target: 'A' },
         ],
         'directed'
       );
@@ -154,7 +163,7 @@ describe('GraphConnectivity', () => {
         ['A', 'B', 'C'],
         [
           { id: 'e1', source: 'A', target: 'B' },
-          { id: 'e2', source: 'B', target: 'C' }
+          { id: 'e2', source: 'B', target: 'C' },
         ],
         'directed'
       );
@@ -167,7 +176,7 @@ describe('GraphConnectivity', () => {
         [
           { id: 'e1', source: 'A', target: 'B' },
           { id: 'e2', source: 'B', target: 'A' },
-          { id: 'e3', source: 'C', target: 'D' }
+          { id: 'e3', source: 'C', target: 'D' },
         ],
         'directed'
       );
@@ -182,7 +191,7 @@ describe('GraphConnectivity', () => {
           { id: 'e2', source: 'B', target: 'C' },
           { id: 'e3', source: 'C', target: 'D' },
           { id: 'e4', source: 'D', target: 'A' },
-          { id: 'e5', source: 'B', target: 'D' }
+          { id: 'e5', source: 'B', target: 'D' },
         ],
         'directed'
       );

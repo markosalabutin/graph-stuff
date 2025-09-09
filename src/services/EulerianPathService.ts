@@ -1,5 +1,6 @@
 import type { GraphAPI } from '../context/GraphContext';
 import type { VertexId, EdgeId, Weight } from '../domain/Graph';
+import type { GraphDTO } from '../domain/GraphDTO';
 import type { GraphType } from '../domain/GraphModel';
 import { GraphUtils } from '../utils/GraphUtils';
 
@@ -21,10 +22,10 @@ export interface EulerianAnalysis {
 
 /**
  * Service for finding Eulerian paths and cycles in graphs
- * 
+ *
  * An Eulerian path visits every edge exactly once.
  * An Eulerian cycle is an Eulerian path that starts and ends at the same vertex.
- * 
+ *
  * Conditions:
  * - Eulerian cycle: All vertices have even degree and graph is connected
  * - Eulerian path: Exactly 0 or 2 vertices have odd degree and graph is connected
@@ -35,7 +36,7 @@ export class EulerianPathService {
    */
   static analyzeGraph(graph: GraphAPI): EulerianAnalysis {
     const vertices = graph.getVertices();
-    
+
     if (vertices.length === 0) {
       return {
         oddDegreeVertices: [],
@@ -47,23 +48,26 @@ export class EulerianPathService {
 
     // Use GraphUtils for degree calculation
     let vertexDegrees: Map<VertexId, number>;
-    
+
     if (graph.getGraphType() === 'directed') {
       // For directed graphs, we need to consider total degree (in + out)
-      const { inDegrees, outDegrees } = GraphUtils.calculateDirectedDegrees(graph);
+      const { inDegrees, outDegrees } =
+        GraphUtils.calculateDirectedDegrees(graph);
       vertexDegrees = new Map();
-      
-      vertices.forEach(vertex => {
-        const totalDegree = (inDegrees.get(vertex) || 0) + (outDegrees.get(vertex) || 0);
+
+      vertices.forEach((vertex) => {
+        const totalDegree =
+          (inDegrees.get(vertex) || 0) + (outDegrees.get(vertex) || 0);
         vertexDegrees.set(vertex, totalDegree);
       });
     } else {
       // For undirected graphs, use the standard degree calculation
       vertexDegrees = GraphUtils.calculateVertexDegrees(graph);
     }
-    
+
     // Separate odd and even degree vertices
-    const { oddDegreeVertices, evenDegreeVertices } = GraphUtils.separateVerticesByDegree(vertexDegrees);
+    const { oddDegreeVertices, evenDegreeVertices } =
+      GraphUtils.separateVerticesByDegree(vertexDegrees);
 
     // Check connectivity
     const isConnected = GraphUtils.isConnected(graph);
@@ -98,7 +102,10 @@ export class EulerianPathService {
         hasEulerianPath: vertices.length <= 1,
         hasEulerianCycle: vertices.length <= 1,
         path: vertices.length === 1 ? [vertices[0]] : [],
-        reason: vertices.length > 1 ? 'Graph with vertices but no edges cannot have Eulerian path' : 'Single vertex is trivial Eulerian path',
+        reason:
+          vertices.length > 1
+            ? 'Graph with vertices but no edges cannot have Eulerian path'
+            : 'Single vertex is trivial Eulerian path',
       };
     }
 
@@ -146,7 +153,7 @@ export class EulerianPathService {
    */
   private static findEulerianCycle(graph: GraphAPI): VertexId[] | undefined {
     const vertices = graph.getVertices();
-    
+
     if (vertices.length === 0) return [];
 
     // Use GraphUtils to build adjacency list with edge tracking
@@ -154,7 +161,9 @@ export class EulerianPathService {
     const usedEdges = new Set<string>();
 
     // Start from any vertex with edges
-    const startVertex = vertices.find(v => (adjacencyList.get(v)?.length || 0) > 0);
+    const startVertex = vertices.find(
+      (v) => (adjacencyList.get(v)?.length || 0) > 0
+    );
     if (!startVertex) return [];
 
     const circuit: VertexId[] = [];
@@ -163,10 +172,12 @@ export class EulerianPathService {
     while (stack.length > 0) {
       const current = stack[stack.length - 1];
       const neighbors = adjacencyList.get(current) || [];
-      
+
       // Find an unused edge
-      const availableEdge = neighbors.find(({ edgeId }) => !usedEdges.has(edgeId));
-      
+      const availableEdge = neighbors.find(
+        ({ edgeId }) => !usedEdges.has(edgeId)
+      );
+
       if (availableEdge) {
         // Traverse the edge
         usedEdges.add(availableEdge.edgeId);
@@ -183,14 +194,17 @@ export class EulerianPathService {
   /**
    * Finds an Eulerian path between two odd-degree vertices
    */
-  private static findEulerianPathBetweenOddVertices(graph: GraphAPI, analysis: EulerianAnalysis): VertexId[] | undefined {
+  private static findEulerianPathBetweenOddVertices(
+    graph: GraphAPI,
+    analysis: EulerianAnalysis
+  ): VertexId[] | undefined {
     // Add a temporary edge between the two odd-degree vertices to create an Eulerian cycle
     const [start, end] = analysis.oddDegreeVertices;
-    
+
     // Create a modified graph for the algorithm
     const modifiedEdges = [...graph.getEdges()];
     const tempEdgeId = 'temp-eulerian-edge';
-    
+
     // Add temporary edge
     modifiedEdges.push({
       id: tempEdgeId,
@@ -206,16 +220,20 @@ export class EulerianPathService {
       getGraphType: () => graph.getGraphType(),
       addVertex: (id?: VertexId) => graph.addVertex(id),
       getVertex: (id: VertexId) => graph.getVertex(id),
-      addEdge: (source: VertexId, target: VertexId, weight?: Weight) => graph.addEdge(source, target, weight),
-      setEdgeWeight: (edgeId: EdgeId, weight: Weight) => graph.setEdgeWeight(edgeId, weight),
+      addEdge: (source: VertexId, target: VertexId, weight?: Weight) =>
+        graph.addEdge(source, target, weight),
+      setEdgeWeight: (edgeId: EdgeId, weight: Weight) =>
+        graph.setEdgeWeight(edgeId, weight),
       removeVertex: (id: VertexId) => graph.removeVertex(id),
       removeEdge: (edgeId: EdgeId) => graph.removeEdge(edgeId),
-      transitionGraphType: (targetType: GraphType) => graph.transitionGraphType(targetType),
+      transitionGraphType: (targetType: GraphType) =>
+        graph.transitionGraphType(targetType),
+      resetFromDTO: (dto: GraphDTO) => graph.resetFromDTO(dto),
     };
 
     // Find Eulerian cycle in modified graph
     const cycle = this.findEulerianCycle(modifiedGraph);
-    
+
     if (!cycle) return undefined;
 
     // Remove the temporary edge from the path
@@ -223,13 +241,19 @@ export class EulerianPathService {
     const startIndex = cycle.findIndex((vertex, i) => {
       if (i === cycle.length - 1) return false;
       const nextVertex = cycle[i + 1];
-      return (vertex === start && nextVertex === end) || (vertex === end && nextVertex === start);
+      return (
+        (vertex === start && nextVertex === end) ||
+        (vertex === end && nextVertex === start)
+      );
     });
 
     if (startIndex === -1) return cycle;
 
     // Split the cycle to create a path from start to end
-    const path = [...cycle.slice(startIndex + 1), ...cycle.slice(0, startIndex + 1)];
+    const path = [
+      ...cycle.slice(startIndex + 1),
+      ...cycle.slice(0, startIndex + 1),
+    ];
     return path;
   }
 }

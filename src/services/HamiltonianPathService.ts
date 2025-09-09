@@ -27,10 +27,10 @@ export interface HamiltonianAnalysis {
 
 /**
  * Service for finding Hamiltonian paths and cycles in graphs
- * 
+ *
  * A Hamiltonian path visits every vertex exactly once.
  * A Hamiltonian cycle is a Hamiltonian path that starts and ends at the same vertex.
- * 
+ *
  * Note: The Hamiltonian path problem is NP-complete, so this implementation uses
  * backtracking which may be slow for large graphs.
  */
@@ -42,7 +42,7 @@ export class HamiltonianPathService {
    */
   static analyzeGraph(graph: GraphAPI): HamiltonianAnalysis {
     const vertices = graph.getVertices();
-    
+
     if (vertices.length === 0) {
       return {
         vertexCount: 0,
@@ -153,7 +153,7 @@ export class HamiltonianPathService {
    */
   private static searchHamiltonianPath(graph: GraphAPI): HamiltonianPathResult {
     const vertices = graph.getVertices();
-    
+
     // Use GraphUtils to build adjacency list
     const adjacencyList = GraphUtils.buildAdjacencyList(graph);
 
@@ -178,15 +178,18 @@ export class HamiltonianPathService {
 
       if (result) {
         bestPath = result.path;
-        
+
         // Check if it's a cycle (can return to start)
         const lastVertex = result.path[result.path.length - 1];
         const neighbors = adjacencyList.get(lastVertex) || new Set();
-        if (neighbors.has(startVertex) && result.path.length === vertices.length) {
+        if (
+          neighbors.has(startVertex) &&
+          result.path.length === vertices.length
+        ) {
           hasHamiltonianCycle = true;
           break; // Found a cycle, which is the best possible result
         }
-        
+
         if (result.path.length === vertices.length) {
           break; // Found a complete path
         }
@@ -232,7 +235,7 @@ export class HamiltonianPathService {
     }
 
     const neighbors = adjacencyList.get(currentVertex) || new Set();
-    
+
     for (const neighbor of neighbors) {
       if (!visited.has(neighbor)) {
         // Add neighbor to path
@@ -266,7 +269,10 @@ export class HamiltonianPathService {
   /**
    * Checks if the graph satisfies Ore's theorem
    */
-  private static satisfiesOreTheorem(graph: GraphAPI, analysis: HamiltonianAnalysis): boolean {
+  private static satisfiesOreTheorem(
+    graph: GraphAPI,
+    analysis: HamiltonianAnalysis
+  ): boolean {
     const vertices = graph.getVertices();
     const n = vertices.length;
 
@@ -280,13 +286,13 @@ export class HamiltonianPathService {
       for (let j = i + 1; j < vertices.length; j++) {
         const u = vertices[i];
         const v = vertices[j];
-        
+
         // If vertices are not adjacent
         const uNeighbors = adjacencyList.get(u) || new Set();
         if (!uNeighbors.has(v)) {
           const degU = analysis.vertexDegrees.get(u) || 0;
           const degV = analysis.vertexDegrees.get(v) || 0;
-          
+
           if (degU + degV < n) {
             return false;
           }
@@ -295,46 +301,5 @@ export class HamiltonianPathService {
     }
 
     return true;
-  }
-
-  /**
-   * Checks if the graph is connected
-   */
-  private static isGraphConnected(graph: GraphAPI): boolean {
-    const vertices = graph.getVertices();
-    const edges = graph.getEdges();
-
-    if (vertices.length <= 1) return true;
-    if (edges.length === 0) return false;
-
-    // Build adjacency list
-    const adjacencyList = new Map<VertexId, Set<VertexId>>();
-    vertices.forEach(vertex => adjacencyList.set(vertex, new Set()));
-
-    edges.forEach(edge => {
-      adjacencyList.get(edge.source)?.add(edge.target);
-      if (graph.getGraphType() === 'undirected') {
-        adjacencyList.get(edge.target)?.add(edge.source);
-      }
-    });
-
-    // DFS to check connectivity
-    const visited = new Set<VertexId>();
-    const stack = [vertices[0]];
-
-    while (stack.length > 0) {
-      const current = stack.pop()!;
-      if (visited.has(current)) continue;
-      
-      visited.add(current);
-      const neighbors = adjacencyList.get(current) || new Set();
-      neighbors.forEach(neighbor => {
-        if (!visited.has(neighbor)) {
-          stack.push(neighbor);
-        }
-      });
-    }
-
-    return visited.size === vertices.length;
   }
 }

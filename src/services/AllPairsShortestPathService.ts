@@ -17,15 +17,14 @@ export interface AllPairsError {
 }
 
 export class AllPairsShortestPathService {
-  private static validateGraph(
-    graph: GraphAPI
-  ): AllPairsError | null {
+  private static validateGraph(graph: GraphAPI): AllPairsError | null {
     const vertices = graph.getVertices();
 
     if (vertices.length < 2) {
       return {
         type: 'validation',
-        message: 'All-pairs shortest path computation requires at least 2 vertices',
+        message:
+          'All-pairs shortest path computation requires at least 2 vertices',
       };
     }
 
@@ -87,7 +86,11 @@ export class AllPairsShortestPathService {
           const distKJ = distances.get(k)!.get(j)!;
           const distIJ = distances.get(i)!.get(j)!;
 
-          if (distIK !== Infinity && distKJ !== Infinity && distIK + distKJ < distIJ) {
+          if (
+            distIK !== Infinity &&
+            distKJ !== Infinity &&
+            distIK + distKJ < distIJ
+          ) {
             distances.get(i)!.set(j, distIK + distKJ);
             predecessors.get(i)!.set(j, predecessors.get(k)!.get(j) || null);
           }
@@ -136,16 +139,16 @@ export class AllPairsShortestPathService {
     const newVertex = '__johnson_temp__';
     const extendedVertices = [...vertices, newVertex];
     const extendedEdges = [
-      ...edges.map(edge => ({
+      ...edges.map((edge) => ({
         ...edge,
-        weight: isWeighted ? edge.weight : 1
+        weight: isWeighted ? edge.weight : 1,
       })),
-      ...vertices.map(v => ({
+      ...vertices.map((v) => ({
         id: `__temp_${v}__`,
         source: newVertex,
         target: v,
-        weight: 0
-      }))
+        weight: 0,
+      })),
     ];
 
     // Step 2: Run Bellman-Ford from the new vertex
@@ -163,9 +166,12 @@ export class AllPairsShortestPathService {
     const h = bellmanFordResult;
 
     // Step 3: Reweight edges using h values
-    const reweightedEdges = edges.map(edge => ({
+    const reweightedEdges = edges.map((edge) => ({
       ...edge,
-      weight: (isWeighted ? edge.weight : 1) + h.get(edge.source)! - h.get(edge.target)!
+      weight:
+        (isWeighted ? edge.weight : 1) +
+        h.get(edge.source)! -
+        h.get(edge.target)!,
     }));
 
     // Step 4: Run Dijkstra from each vertex on reweighted graph
@@ -187,9 +193,12 @@ export class AllPairsShortestPathService {
         // Restore original distances
         const reweightedDist = dijkstraResult.distances.get(target)!;
         const originalDist = reweightedDist - h.get(source)! + h.get(target)!;
-        
+
         sourceDistances.set(target, originalDist);
-        sourcePredecessors.set(target, dijkstraResult.predecessors.get(target)!);
+        sourcePredecessors.set(
+          target,
+          dijkstraResult.predecessors.get(target)!
+        );
       }
 
       distances.set(source, sourceDistances);
@@ -211,21 +220,40 @@ export class AllPairsShortestPathService {
   ): GraphAPI {
     return {
       getVertices: () => vertices,
-      getEdges: () => edges.map(edge => ({
-        id: `${edge.source}-${edge.target}`,
-        source: edge.source,
-        target: edge.target,
-        weight: edge.weight
-      })),
-      getGraphType: () => isDirected ? 'directed' : 'undirected',
+      getEdges: () =>
+        edges.map((edge) => ({
+          id: `${edge.source}-${edge.target}`,
+          source: edge.source,
+          target: edge.target,
+          weight: edge.weight,
+        })),
+      getGraphType: () => (isDirected ? 'directed' : 'undirected'),
       // These methods are not used by the service but required by the interface
-      addVertex: () => { throw new Error('Not implemented'); },
-      getVertex: () => { throw new Error('Not implemented'); },
-      addEdge: () => { throw new Error('Not implemented'); },
-      setEdgeWeight: () => { throw new Error('Not implemented'); },
-      removeVertex: () => { throw new Error('Not implemented'); },
-      removeEdge: () => { throw new Error('Not implemented'); },
-      transitionGraphType: () => { throw new Error('Not implemented'); }
+      // fug you interface segregation principle
+      addVertex: () => {
+        throw new Error('Not implemented');
+      },
+      getVertex: () => {
+        throw new Error('Not implemented');
+      },
+      addEdge: () => {
+        throw new Error('Not implemented');
+      },
+      setEdgeWeight: () => {
+        throw new Error('Not implemented');
+      },
+      removeVertex: () => {
+        throw new Error('Not implemented');
+      },
+      removeEdge: () => {
+        throw new Error('Not implemented');
+      },
+      transitionGraphType: () => {
+        throw new Error('Not implemented');
+      },
+      resetFromDTO: () => {
+        throw new Error('Not implemented');
+      },
     };
   }
 
@@ -245,8 +273,13 @@ export class AllPairsShortestPathService {
         continue;
       }
 
-      const result = ShortestPathService.bellmanFord(mockGraph, source, target, true);
-      
+      const result = ShortestPathService.bellmanFord(
+        mockGraph,
+        source,
+        target,
+        true
+      );
+
       if ('type' in result) {
         return result as AllPairsError;
       }
@@ -262,7 +295,10 @@ export class AllPairsShortestPathService {
     edges: Array<{ source: VertexId; target: VertexId; weight: number }>,
     source: VertexId,
     isDirected: boolean
-  ): { distances: Map<VertexId, number>; predecessors: Map<VertexId, VertexId | null> } {
+  ): {
+    distances: Map<VertexId, number>;
+    predecessors: Map<VertexId, VertexId | null>;
+  } {
     const mockGraph = this.createMockGraph(vertices, edges, isDirected);
     const distances = new Map<VertexId, number>();
     const predecessors = new Map<VertexId, VertexId | null>();
@@ -275,8 +311,13 @@ export class AllPairsShortestPathService {
         continue;
       }
 
-      const result = ShortestPathService.dijkstra(mockGraph, source, target, true);
-      
+      const result = ShortestPathService.dijkstra(
+        mockGraph,
+        source,
+        target,
+        true
+      );
+
       if ('type' in result) {
         // If there's an error, set distance to infinity
         distances.set(target, Infinity);
