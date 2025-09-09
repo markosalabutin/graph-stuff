@@ -73,6 +73,9 @@ export const GraphCanvas: React.FC = () => {
   const [positions, setPositions] = useState<Record<VertexId, VertexPosition>>(
     {}
   );
+  const [defaultVertexColors, setDefaultVertexColors] = useState<
+    Record<VertexId, string>
+  >({});
 
   const [dragState, setDragState] = useState<DragState>({
     isDragging: false,
@@ -189,6 +192,15 @@ export const GraphCanvas: React.FC = () => {
 
           const data = result.graphData;
           graphApi.resetFromDTO(data);
+          setIsDirected(data.directed);
+
+          const importedColors: Record<VertexId, string> = {};
+          data.vertices.forEach((vertex) => {
+            if (vertex.color) {
+              importedColors[vertex.id] = vertex.color;
+            }
+          });
+          setDefaultVertexColors(importedColors);
 
           const vertices = getVertices();
           const vertexPositions = positionVerticesInCircle(vertices);
@@ -286,10 +298,9 @@ export const GraphCanvas: React.FC = () => {
           return;
         }
 
-        return; // Exit early to prevent other mode handling
+        return;
       }
 
-      // Handle delete mode
       if (currentMode === Mode.DELETE) {
         removeVertex(vertexId);
         setPositions((prev) => {
@@ -300,7 +311,6 @@ export const GraphCanvas: React.FC = () => {
         return;
       }
 
-      // Handle edge creation mode
       if (currentMode === Mode.EDGE) {
         if (edgeCreationState.sourceVertex === null) {
           setEdgeCreationState((prev) => ({
@@ -647,18 +657,20 @@ export const GraphCanvas: React.FC = () => {
         {edges.map(renderEdge)}
 
         {renderPreviewEdge()}
-        {void console.log({ positions, vertices })}
 
         {vertices.map((vertexId) => {
           const position = positions[vertexId];
           if (!position) return null;
 
-          // Graph coloring
           const getVertexColor = (): string | undefined => {
-            if (!isColoringActive || !coloringResult) return undefined;
-            const colorIndex = coloringResult.coloring.get(vertexId);
-            if (colorIndex === undefined) return undefined;
-            return getColorByIndex(colorIndex);
+            if (isColoringActive && coloringResult) {
+              const colorIndex = coloringResult.coloring.get(vertexId);
+              if (colorIndex !== undefined) {
+                return getColorByIndex(colorIndex);
+              }
+            }
+
+            return defaultVertexColors[vertexId];
           };
 
           // Shortest path

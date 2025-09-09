@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './Edge.module.css';
-import { EDGE_THICKNESS } from '../constants/graphConstants';
+import { EDGE_THICKNESS, VERTEX_RADIUS } from '../constants/graphConstants';
 import type { EdgeId, Weight } from '../domain/Graph';
 
 interface EdgeProps {
@@ -40,6 +40,9 @@ export const Edge: React.FC<EdgeProps> = ({
   onEdgeClick,
   onWeightClick,
 }) => {
+  // Check if this is a self-loop
+  const isSelfLoop = startX === endX && startY === endY;
+
   const angle = Math.atan2(endY - startY, endX - startX);
   const arrowOffset = 20;
 
@@ -96,79 +99,119 @@ export const Edge: React.FC<EdgeProps> = ({
   };
 
   return (
-    <svg
-      key={id}
-      className={getEdgeClass()}
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        width: '100%',
-        height: '100%',
-        pointerEvents: 'none',
-        zIndex: 1,
-      }}
-      onClick={handleClick}
-    >
-      {isDirected && (
-        <defs>
-          <marker
-            id={`arrowhead-${id || 'preview'}`}
-            markerWidth="6"
-            markerHeight="5"
-            refX="6"
-            refY="2.5"
-            orient="auto"
-          >
-            <polygon points="0 0, 6 2.5, 0 5" className={styles.arrowhead} />
-          </marker>
-        </defs>
-      )}
+    <>
+      <svg
+        key={id}
+        className={getEdgeClass()}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 1,
+        }}
+        onClick={handleClick}
+      >
+        {isDirected && (
+          <defs>
+            <marker
+              id={`arrowhead-${id || 'preview'}`}
+              markerWidth="6"
+              markerHeight="5"
+              refX="6"
+              refY="2.5"
+              orient="auto"
+            >
+              <polygon points="0 0, 6 2.5, 0 5" className={styles.arrowhead} />
+            </marker>
+            <marker
+              id={`arrowhead-selfloop-${id || 'preview'}`}
+              markerWidth="6"
+              markerHeight="5"
+              viewBox="0 0 12 10"
+              refX="6"
+              refY="5"
+              orient="auto"
+            >
+              <g transform="rotate(270 6 5) translate(0, 0)">
+                <polygon
+                  points="3 2.5, 9 5, 3 7.5"
+                  className={styles.arrowhead}
+                />
+              </g>
+            </marker>
+          </defs>
+        )}
 
-      <line
-        x1={startX}
-        y1={startY}
-        x2={isDirected ? adjustedEndX : endX}
-        y2={isDirected ? adjustedEndY : endY}
-        strokeWidth={EDGE_THICKNESS}
-        className={styles.line}
-        markerEnd={
-          isDirected ? `url(#arrowhead-${id || 'preview'})` : undefined
-        }
-        style={{ pointerEvents: 'stroke' }}
-      />
-
-      {isWeighted && !isPreview && (
-        <g
-          onClick={handleWeightClick}
-          className={onWeightClick ? styles.weightClickable : ''}
-          style={{
-            cursor: onWeightClick ? 'pointer' : 'default',
-          }}
-        >
+        {isSelfLoop ? (
           <circle
-            cx={midX}
-            cy={midY}
-            r="12"
-            className={styles.weightBackground}
-            style={{
-              pointerEvents: onWeightClick ? 'all' : 'none'
-            }}
+            cx={startX + 20}
+            cy={startY - VERTEX_RADIUS}
+            r={20}
+            fill="none"
+            strokeWidth={EDGE_THICKNESS}
+            className={styles.line}
+            style={{ pointerEvents: 'stroke' }}
           />
-          <text
-            x={midX}
-            y={midY}
-            className={styles.weightLabel}
-            textAnchor="middle"
-            dominantBaseline="central"
+        ) : (
+          <line
+            x1={startX}
+            y1={startY}
+            x2={isDirected ? adjustedEndX : endX}
+            y2={isDirected ? adjustedEndY : endY}
+            strokeWidth={EDGE_THICKNESS}
+            className={styles.line}
+            markerEnd={
+              isDirected ? `url(#arrowhead-${id || 'preview'})` : undefined
+            }
+            style={{ pointerEvents: 'stroke' }}
+          />
+        )}
+        {isWeighted && !isPreview && (
+          <g
+            onClick={handleWeightClick}
+            className={onWeightClick ? styles.weightClickable : ''}
             style={{
-              pointerEvents: onWeightClick ? 'all' : 'none'
+              cursor: onWeightClick ? 'pointer' : 'default',
             }}
           >
-            {weight}
-          </text>
-        </g>
+            <circle
+              cx={isSelfLoop ? startX : midX}
+              cy={isSelfLoop ? startY - 40 : midY}
+              r="12"
+              className={styles.weightBackground}
+              style={{
+                pointerEvents: onWeightClick ? 'all' : 'none',
+              }}
+            />
+            <text
+              x={isSelfLoop ? startX : midX}
+              y={isSelfLoop ? startY - 40 : midY}
+              className={styles.weightLabel}
+              textAnchor="middle"
+              dominantBaseline="central"
+              style={{
+                pointerEvents: onWeightClick ? 'all' : 'none',
+              }}
+            >
+              {weight}
+            </text>
+          </g>
+        )}
+      </svg>
+
+      {isSelfLoop && isDirected && (
+        <div
+          className={styles.selfLoopArrow}
+          style={{
+            left: startX - 6,
+            top: startY - VERTEX_RADIUS - 10,
+            transform: 'rotate(0deg)',
+          }}
+        />
       )}
-    </svg>
+    </>
   );
 };
